@@ -4,7 +4,7 @@ Level2の見出しに実装機能を記載する
 
 ## husky, lint-stagedの導入
 
-- [ ] 実装済み
+- [x] 実装済み
 
 ## shadcn/uiの導入
 
