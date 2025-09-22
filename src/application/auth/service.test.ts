@@ -52,6 +52,21 @@ class InMemoryRepo implements AuthRepository {
   async deleteSession(id: string): Promise<void> {
     this.sessions = this.sessions.filter((s) => s.id !== id);
   }
+
+  // test helpers
+  expireSession(id: string) {
+    const s = this.sessions.find((x) => x.id === id);
+    if (s) (s as any).expiresAt = new Date(Date.now() - 1000);
+  }
+  createOrphanSession(id: string, userId: number) {
+    const s = new Session({
+      id,
+      userId,
+      expiresAt: new Date(Date.now() + 60_000),
+      createdAt: new Date(),
+    });
+    this.sessions.push(s);
+  }
 }
 
 describe("AuthService", () => {
@@ -124,6 +139,25 @@ describe("AuthService", () => {
 
   it("returns null in me() when session missing", async () => {
     const me = await service.me(null);
+    expect(me.ok).toBe(false);
+    expect(me.user).toBeNull();
+  });
+
+  it("returns null in me() when session expired (and removes it)", async () => {
+    const su = await service.signup({
+      email: "ex@example.com",
+      password: "Password123!",
+    });
+    if (!su.ok) throw new Error("signup failed in test");
+    (repo as InMemoryRepo).expireSession(su.sessionId);
+    const me = await service.me(su.sessionId);
+    expect(me.ok).toBe(false);
+    expect(me.user).toBeNull();
+  });
+
+  it("returns null in me() when user not found for session", async () => {
+    (repo as InMemoryRepo).createOrphanSession("orphan", 9999);
+    const me = await service.me("orphan");
     expect(me.ok).toBe(false);
     expect(me.user).toBeNull();
   });
