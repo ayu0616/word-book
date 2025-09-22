@@ -1,24 +1,58 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { client } from "@/lib/hono";
+
+const formSchema = z.object({
+  email: z.email({ message: "有効なメールアドレスを入力してください。" }),
+  name: z
+    .string()
+    .min(1, { message: "名前は1文字以上で入力してください。" })
+    .optional()
+    .or(z.literal("")),
+  password: z
+    .string()
+    .min(8, { message: "パスワードは8文字以上で入力してください。" }),
+});
+
+type SignupFormValues = z.infer<typeof formSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      name: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: SignupFormValues) => {
     setError(null);
-    setLoading(true);
     try {
       const res = await client.auth.signup.$post({
-        json: { email, password, name: name || undefined },
+        json: {
+          email: values.email,
+          password: values.password,
+          name: values.name || undefined,
+        },
       });
       const data = await res.json();
       if (!res.ok || !data?.ok) {
@@ -29,68 +63,78 @@ export default function SignupPage() {
       router.refresh();
     } catch {
       setError("ネットワークエラーが発生しました");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="mx-auto max-w-md px-4 py-12">
       <h1 className="mb-6 text-2xl font-semibold">新規登録</h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">
-            メールアドレス
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full rounded border px-3 py-2"
-            placeholder="you@example.com"
-            autoComplete="email"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>メールアドレス</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium">
-            名前（任意）
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded border px-3 py-2"
-            placeholder="Taro"
-            autoComplete="name"
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>名前（任意）</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Taro"
+                    autoComplete="name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full rounded border px-3 py-2"
-            placeholder="••••••••"
-            autoComplete="new-password"
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>パスワード</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-black px-4 py-2 text-white disabled:opacity-60"
-        >
-          {loading ? "送信中..." : "登録"}
-        </button>
-      </form>
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? "送信中..." : "登録"}
+          </Button>
+        </form>
+      </Form>
       <p className="mt-4 text-sm text-gray-600">
         すでにアカウントをお持ちの方は{" "}
         <a href="/login" className="underline">
