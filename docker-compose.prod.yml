@@ -1,34 +1,32 @@
 services:
   app:
-    container_name: app
+    container_name: app-prod
     build:
       context: .
       dockerfile: Dockerfile
-      target: dev
-    command: bun dev
-    volumes:
-      - ./:/app
-      - /app/node_modules
+      target: runner
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/app_db
+      - PORT=3000
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/app_db
     depends_on:
       - db
+    restart: always
 
   db:
     image: postgres:17-alpine
-    container_name: db
+    container_name: db-prod
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: app_db
+    volumes:
+      - db_data_prod:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
 
 volumes:
-  db_data:
+  db_data_prod:

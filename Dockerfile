@@ -1,16 +1,39 @@
-FROM oven/bun:1 AS base
+FROM oven/bun:1 AS deps
 
 WORKDIR /app
 
-# 依存関係のみ先にインストール（ビルドキャッシュ最適化）
 COPY package.json bun.lock* ./
-RUN bun install
+RUN bun install --frozen-lockfile
 
-# アプリ本体をコピー（docker-composeのボリュームで上書きされる想定）
+FROM oven/bun:1 AS builder
+
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Next.js をビルド
+RUN bun run build
+
+FROM oven/bun:1 AS runner
+WORKDIR /app
+
+# Next.js standalone 出力と public/.next/static をコピー
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/static ./.next/static
+
+ENV NODE_ENV=production
+ENV PORT=3000
 EXPOSE 3000
 
-# docker-compose.yml で command: bun dev を指定しているため、
-# ここでの CMD はデフォルトとして同一に設定
+CMD ["node", "server.js"]
+
+# 開発用ターゲット（docker-compose.yml から build.target: dev で利用）
+FROM oven/bun:1 AS dev
+WORKDIR /app
+COPY package.json bun.lock* ./
+RUN bun install
+COPY . .
+ENV NODE_ENV=development
+EXPOSE 3000
 CMD ["bun", "dev"]

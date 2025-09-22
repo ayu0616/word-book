@@ -19,7 +19,7 @@ Level2の見出しに実装機能を記載する
 
 ## docker-composeで本番環境を構築
 
-- [ ] 実装済み
+- [x] 実装済み
 
 - bun, Next.js
 - PostgreSQL
