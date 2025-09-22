@@ -8,7 +8,7 @@ Level2の見出しに実装機能を記載する
 
 ## shadcn/uiの導入
 
-- [ ] 実装済み
+- [x] 実装済み
 
 ## docker-composeで開発環境を構築
 
