@@ -1,12 +1,11 @@
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { handle } from "hono/vercel";
+import { SESSION_COOKIE } from "@/lib/constants";
 import { AuthController } from "./auth";
 import { TestController } from "./test";
 
 export const runtime = "nodejs";
-
-const SESSION_COOKIE = "sid";
 
 const app = new Hono()
   .basePath("/api")

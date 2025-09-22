@@ -3,7 +3,8 @@ import { getCookie } from "hono/cookie";
 import { handle } from "hono/vercel";
 import { NextResponse } from "next/server";
 
-const SESSION_COOKIE = "sid";
+import { SESSION_COOKIE } from "./lib/constants";
+
 const PUBLIC_PATHS = ["/login", "/signup"];
 
 const app = new Hono().use("*", async (c) => {

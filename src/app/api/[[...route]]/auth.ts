@@ -5,8 +5,8 @@ import { z } from "zod";
 import { AuthService } from "@/application/auth/service";
 import { BcryptPasswordHasher } from "@/infrastructure/auth/passwordHasher.bcrypt";
 import { DrizzleAuthRepository } from "@/infrastructure/auth/repository.drizzle";
+import { SESSION_COOKIE } from "@/lib/constants";
 
-const SESSION_COOKIE = "sid";
 const SESSION_TTL_HOURS = 24 * 7;
 const repo = new DrizzleAuthRepository();
 const hasher = new BcryptPasswordHasher();
