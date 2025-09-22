@@ -14,3 +14,9 @@ export const words = pgTable("words", {
   meaning: text("meaning").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const posts = pgTable("post", {
+  id: text("id").notNull().primaryKey(),
+  text: text("text").notNull(),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+});
