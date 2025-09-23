@@ -68,7 +68,7 @@ export default function SignupContent() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12">
+    <div className="container mx-auto max-w-md px-4 py-12">
       <h1 className="mb-6 text-2xl font-semibold">新規登録</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

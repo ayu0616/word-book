@@ -54,7 +54,7 @@ export default function NewWordBookContent() {
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12">
+    <div className="mx-auto max-w-md px-4 py-12 container">
       <h1 className="mb-6 text-2xl font-semibold">新しい単語帳を作成</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
