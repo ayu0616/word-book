@@ -34,6 +34,19 @@ class InMemoryWordRepository implements WordRepository {
       .map((w) => Word.fromPersistence(w));
   }
 
+  async update(word: Word): Promise<void> {
+    const index = this.words.findIndex((w) => w.id === word.id);
+    if (index !== -1) {
+      this.words[index] = {
+        ...this.words[index],
+        term: word.term,
+        meaning: word.meaning,
+        consecutiveCorrectCount: word.consecutiveCorrectCount,
+        nextReviewDate: word.nextReviewDate,
+      };
+    }
+  }
+
   // Helper to add words for testing
   addWord(word: typeof words.$inferSelect) {
     this.words.push(word);

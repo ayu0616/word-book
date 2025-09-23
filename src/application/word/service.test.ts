@@ -41,6 +41,7 @@ describe("WordService", () => {
           nextReviewDate: new Date(),
         }),
       ]),
+      update: vi.fn(async (_word: Word) => {}),
     };
     const service = new WordService(mockWordRepository);
 
@@ -63,5 +64,123 @@ describe("WordService", () => {
     expect(createdWord.wordBookId).toBe(input.wordBookId);
     expect(createdWord.term).toBe(input.term);
     expect(createdWord.meaning).toBe(input.meaning);
+  });
+
+  it("should update a word", async () => {
+    const mockWordRepository: WordRepository = {
+      createWord: vi.fn(async (word: Word) => word),
+      findById: vi.fn(async (id: number) => {
+        if (id === 1) {
+          return Word.fromPersistence({
+            id: 1,
+            wordBookId: 1,
+            term: "Old Term",
+            meaning: "Old Meaning",
+            createdAt: new Date(),
+            consecutiveCorrectCount: 0,
+            nextReviewDate: new Date(),
+          });
+        }
+        return undefined;
+      }),
+      findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
+      update: vi.fn(async (_word: Word) => {}),
+    };
+    const service = new WordService(mockWordRepository);
+
+    const input = {
+      id: 1,
+      term: "New Term",
+      meaning: "New Meaning",
+    };
+
+    const updatedWord = await service.updateWord(input);
+
+    expect(mockWordRepository.findById).toHaveBeenCalledWith(input.id);
+    expect(mockWordRepository.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: input.id,
+        term: input.term,
+        meaning: input.meaning,
+      }),
+    );
+    expect(updatedWord).toBeInstanceOf(Word);
+    expect(updatedWord.term).toBe(input.term);
+    expect(updatedWord.meaning).toBe(input.meaning);
+  });
+
+  it("should find words by word book ID", async () => {
+    const mockWordRepository: WordRepository = {
+      createWord: vi.fn(async (word: Word) => word),
+      findById: vi.fn(async (_id: number) => undefined),
+      findWordsByWordBookId: vi.fn(async (wordBookId: number) => [
+        Word.fromPersistence({
+          id: 1,
+          wordBookId,
+          term: "Word 1",
+          meaning: "Meaning 1",
+          createdAt: new Date(),
+          consecutiveCorrectCount: 0,
+          nextReviewDate: new Date(),
+        }),
+      ]),
+      update: vi.fn(async (_word: Word) => {}),
+    };
+    const service = new WordService(mockWordRepository);
+
+    const wordBookId = 1;
+    const words = await service.findWordsByWordBookId(wordBookId);
+
+    expect(mockWordRepository.findWordsByWordBookId).toHaveBeenCalledWith(
+      wordBookId,
+    );
+    expect(words).toHaveLength(1);
+    expect(words[0]).toBeInstanceOf(Word);
+  });
+
+  it("should find a word by ID", async () => {
+    const mockWordRepository: WordRepository = {
+      createWord: vi.fn(async (word: Word) => word),
+      findById: vi.fn(async (id: number) => {
+        if (id === 1) {
+          return Word.fromPersistence({
+            id: 1,
+            wordBookId: 1,
+            term: "Found Word",
+            meaning: "Found Meaning",
+            createdAt: new Date(),
+            consecutiveCorrectCount: 0,
+            nextReviewDate: new Date(),
+          });
+        }
+        return undefined;
+      }),
+      findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
+      update: vi.fn(async (_word: Word) => {}),
+    };
+    const service = new WordService(mockWordRepository);
+
+    const wordId = 1;
+    const foundWord = await service.findById(wordId);
+
+    expect(mockWordRepository.findById).toHaveBeenCalledWith(wordId);
+    expect(foundWord).toBeInstanceOf(Word);
+    expect(foundWord?.id).toBe(wordId);
+  });
+
+  it("should return undefined if word is not found by ID", async () => {
+    const mockWordRepository: WordRepository = {
+      createWord: vi.fn(async (word: Word) => word),
+      findById: vi.fn(async (_id: number) => undefined),
+      findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
+      update: vi.fn(async (_word: Word) => {}),
+    };
+    const service = new WordService(mockWordRepository);
+
+    const wordId = 999;
+    const foundWord = await service.findById(wordId);
+
+    expect(mockWordRepository.findById).toHaveBeenCalledWith(wordId);
+    expect(foundWord).toBeUndefined();
   });
 });

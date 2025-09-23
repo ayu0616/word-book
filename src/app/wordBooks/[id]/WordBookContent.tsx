@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { EditWordModal } from "@/components/EditWordModal";
+import { Button } from "@/components/ui/button";
 
 interface WordBook {
   id: number;
@@ -18,11 +21,39 @@ interface Word {
 
 export default function WordBookContent({
   wordBook,
-  words,
+  words: initialWords,
 }: {
   wordBook: WordBook;
   words: Word[];
 }) {
+  const [words, setWords] = useState(initialWords);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingWord, setEditingWord] = useState<Word | null>(null);
+
+  const handleEditClick = (word: Word) => {
+    setEditingWord(word);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveWord = (updatedWord: {
+    id: number;
+    term: string;
+    meaning: string;
+  }) => {
+    setWords((prevWords) =>
+      prevWords.map((word) =>
+        word.id === updatedWord.id ? { ...word, ...updatedWord } : word,
+      ),
+    );
+    setIsModalOpen(false);
+    setEditingWord(null);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingWord(null);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{wordBook.title}</h1>
@@ -34,9 +65,21 @@ export default function WordBookContent({
       ) : (
         <ul className="space-y-2">
           {words.map((word) => (
-            <li key={word.id} className="p-3 border rounded-md shadow-sm">
-              <p className="font-semibold">{word.term}</p>
-              <p className="text-gray-600">{word.meaning}</p>
+            <li
+              key={word.id}
+              className="p-3 border rounded-md shadow-sm flex justify-between items-center"
+            >
+              <div>
+                <p className="font-semibold">{word.term}</p>
+                <p className="text-gray-600">{word.meaning}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEditClick(word)}
+              >
+                Edit
+              </Button>
             </li>
           ))}
         </ul>
@@ -56,6 +99,15 @@ export default function WordBookContent({
           新しい単語を追加
         </Link>
       </div>
+
+      {editingWord && (
+        <EditWordModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          word={editingWord}
+          onSave={handleSaveWord}
+        />
+      )}
     </div>
   );
 }

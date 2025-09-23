@@ -77,4 +77,49 @@ export const WordController = new Hono()
 
     const words = await wordService.findWordsByWordBookId(wordBookId);
     return c.json({ ok: true, words }, 200);
-  });
+  })
+  .put(
+    "/:id",
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().transform(Number),
+      }),
+    ),
+    zValidator(
+      "json",
+      z.object({
+        term: z.string().min(1).max(255),
+        meaning: z.string().min(1),
+      }),
+    ),
+    async (c) => {
+      const sid = getCookie(c, SESSION_COOKIE);
+      if (!sid) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const me = await authService.me(sid);
+      if (!me.ok || !me.user) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const { id } = c.req.valid("param");
+      const { term, meaning } = c.req.valid("json");
+
+      const existingWord = await wordService.findById(id);
+      if (!existingWord) {
+        return c.json({ ok: false, error: "word_not_found" }, 404);
+      }
+
+      const wordBook = await wordBookService.findWordBookById(
+        existingWord.wordBookId,
+      );
+      if (!wordBook || wordBook.userId !== me.user.id) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const updatedWord = await wordService.updateWord({ id, term, meaning });
+      return c.json({ ok: true, word: updatedWord }, 200);
+    },
+  );
