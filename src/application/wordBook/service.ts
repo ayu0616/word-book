@@ -16,4 +16,8 @@ export class WordBookService {
   async findWordBookById(id: number): Promise<WordBook | null> {
     return this.repo.findWordBookById(id);
   }
+
+  async deleteWordBook(id: number): Promise<void> {
+    await this.repo.delete(id);
+  }
 }

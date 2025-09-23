@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 interface WordBook {
   id: number;
@@ -10,13 +10,38 @@ interface WordBook {
 }
 
 export default function HomeContent({
-  wordBooks,
+  wordBooks: initialWordBooks,
   error,
 }: {
   wordBooks: WordBook[];
   error: string | null;
 }) {
+  const [wordBooks, setWordBooks] = useState(initialWordBooks);
   const [localError, _setLocalError] = useState<string | null>(error);
+
+  const handleDeleteClick = useCallback(async (wordBookId: number) => {
+    if (!confirm("Are you sure you want to delete this word book?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/wordBook/${wordBookId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete word book.");
+      }
+
+      // Update the UI by removing the deleted word book
+      setWordBooks((prevWordBooks) =>
+        prevWordBooks.filter((wordBook) => wordBook.id !== wordBookId),
+      );
+    } catch (error) {
+      console.error("Error deleting word book:", error);
+      // Optionally, display an error message to the user
+    }
+  }, []);
 
   if (localError) {
     return (
@@ -34,13 +59,25 @@ export default function HomeContent({
       ) : (
         <ul className="space-y-2">
           {wordBooks.map((wordBook) => (
-            <li key={wordBook.id} className="p-3 border rounded-md shadow-sm">
-              <Link
-                href={`/wordBooks/${wordBook.id}`}
-                className="text-blue-600 hover:underline"
+            <li
+              key={wordBook.id}
+              className="p-3 border rounded-md shadow-sm flex justify-between items-center"
+            >
+              <div>
+                <Link
+                  href={`/wordBooks/${wordBook.id}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {wordBook.title}
+                </Link>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDeleteClick(wordBook.id)}
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
               >
-                {wordBook.title}
-              </Link>
+                Delete
+              </button>
             </li>
           ))}
         </ul>

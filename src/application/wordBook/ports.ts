@@ -4,4 +4,5 @@ export interface WordBookRepository {
   findWordBooksByUserId(userId: number): Promise<WordBook[]>;
   findWordBookById(id: number): Promise<WordBook | null>;
   create(wordBook: WordBook): Promise<WordBook>;
+  delete(id: number): Promise<void>;
 }

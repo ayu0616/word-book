@@ -9,6 +9,7 @@ describe("WordBookService", () => {
       create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async () => []),
       findWordBookById: vi.fn(async () => null),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -38,6 +39,7 @@ describe("WordBookService", () => {
         WordBook.fromPersistence({ id: 2, userId, title: "Book 2" }),
       ]),
       findWordBookById: vi.fn(async () => null),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -50,5 +52,20 @@ describe("WordBookService", () => {
     expect(wordBooks).toHaveLength(2);
     expect(wordBooks[0]).toBeInstanceOf(WordBook);
     expect(wordBooks[0].userId).toBe(userId);
+  });
+
+  it("should delete a word book", async () => {
+    const mockWordBookRepository: WordBookRepository = {
+      create: vi.fn(async (wordBook: WordBook) => wordBook),
+      findWordBooksByUserId: vi.fn(async () => []),
+      findWordBookById: vi.fn(async () => null),
+      delete: vi.fn(async (_id: number) => {}),
+    };
+    const service = new WordBookService(mockWordBookRepository);
+
+    const wordBookId = 1;
+    await service.deleteWordBook(wordBookId);
+
+    expect(mockWordBookRepository.delete).toHaveBeenCalledWith(wordBookId);
   });
 });

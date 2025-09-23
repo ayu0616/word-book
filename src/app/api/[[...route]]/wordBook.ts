@@ -80,4 +80,41 @@ export const WordBookController = new Hono()
     }
 
     return c.json({ ok: true, wordBook }, 200);
-  });
+  })
+  .delete(
+    "/:id",
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().transform(Number),
+      }),
+    ),
+    async (c) => {
+      const sid = getCookie(c, SESSION_COOKIE);
+      if (!sid) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const me = await authService.me(sid);
+      if (!me.ok || !me.user) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const { id } = c.req.valid("param");
+
+      const existingWordBook = await service.findWordBookById(id);
+      if (!existingWordBook) {
+        return c.json({ ok: false, error: "word_book_not_found" }, 404);
+      }
+
+      if (existingWordBook.userId !== me.user.id) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      await service.deleteWordBook(id);
+      return c.json(
+        { ok: true, message: "Word book deleted successfully" },
+        200,
+      );
+    },
+  );

@@ -36,4 +36,8 @@ export class DrizzleWordBookRepository implements WordBookRepository {
     if (!result) return null;
     return WordBook.fromPersistence(result);
   }
+
+  async delete(id: number): Promise<void> {
+    await db.delete(wordBooks).where(eq(wordBooks.id, id));
+  }
 }
