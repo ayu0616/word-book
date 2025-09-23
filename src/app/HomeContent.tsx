@@ -36,10 +36,7 @@ export default function HomeContent({
           {wordBooks.map((wordBook) => (
             <li key={wordBook.id} className="p-3 border rounded-md shadow-sm">
               <Link
-                href={{
-                  pathname: "/wordBooks/[id]",
-                  query: { id: String(wordBook.id) },
-                }}
+                href={`/wordBooks/${wordBook.id}`}
                 className="text-blue-600 hover:underline"
               >
                 {wordBook.title}

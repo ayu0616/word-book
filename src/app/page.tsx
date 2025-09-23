@@ -23,7 +23,9 @@ export default async function HomePage() {
 
   if (me.ok && me.user) {
     try {
-      wordBooks = await wordBookService.findWordBooksByUserId(me.user.id);
+      wordBooks = (await wordBookService.findWordBooksByUserId(me.user.id)).map(
+        (wb) => Object.assign({}, wb),
+      );
     } catch (_err) {
       error = "単語帳の取得に失敗しました";
     }
