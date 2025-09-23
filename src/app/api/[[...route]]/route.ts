@@ -4,6 +4,8 @@ import { handle } from "hono/vercel";
 import { SESSION_COOKIE } from "@/lib/constants";
 import { AuthController } from "./auth";
 import { TestController } from "./test";
+import { WordController } from "./word";
+import { WordBookController } from "./wordBook";
 
 export const runtime = "nodejs";
 
@@ -11,7 +13,12 @@ const app = new Hono()
   .basePath("/api")
   .use(async (c, next) => {
     const path = c.req.path;
-    if (path === "/api/auth/login" || path === "/api/auth/signup") {
+    if (
+      path === "/api/auth/login" ||
+      path === "/api/auth/signup" ||
+      path === "/api/word/create" ||
+      path === "/api/wordBook/create"
+    ) {
       await next();
       return;
     }
@@ -23,7 +30,9 @@ const app = new Hono()
     await next();
   })
   .route("/test", TestController)
-  .route("/auth", AuthController);
+  .route("/auth", AuthController)
+  .route("/word", WordController)
+  .route("/wordBook", WordBookController);
 
 export type AppType = typeof app;
 
