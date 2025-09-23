@@ -2,9 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,47 +14,47 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { client } from "@/lib/hono";
 
 const formSchema = z.object({
-  title: z
-    .string()
-    .min(1, { message: "単語帳のタイトルを入力してください。" })
-    .max(255),
+  title: z.string().min(1, { message: "Title is required." }).max(255),
 });
 
-type WordBookFormValues = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>;
 
 export default function NewWordBookContent() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-
-  const form = useForm<WordBookFormValues>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
     },
   });
 
-  const onSubmit = async (values: WordBookFormValues) => {
-    setError(null);
+  const onSubmit = async (values: FormData) => {
     try {
-      const res = await client.wordBook.create.$post({ json: values });
-      const data = await res.json();
-      if (!data.ok) {
-        setError(data.error ?? "単語帳の作成に失敗しました");
-        return;
+      const response = await fetch("/api/wordBook/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create word book.");
       }
-      router.push("/"); // Redirect to home or word book list page
-      router.refresh();
-    } catch (_err) {
-      setError("ネットワークエラーが発生しました");
+
+      const data = await response.json();
+      router.push(`/wordBooks/${data.wordBook.id}`);
+    } catch (error) {
+      console.error("Error creating word book:", error);
+      // Optionally, display an error message to the user
     }
   };
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12 container">
-      <h1 className="mb-6 text-2xl font-semibold">新しい単語帳を作成</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">新しい単語帳を作成</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -63,22 +62,15 @@ export default function NewWordBookContent() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>タイトル</FormLabel>
+                <FormLabel>単語帳タイトル</FormLabel>
                 <FormControl>
-                  <Input placeholder="例: 私の単語帳" {...field} />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? "作成中..." : "作成"}
-          </Button>
+          <Button type="submit">作成</Button>
         </form>
       </Form>
     </div>

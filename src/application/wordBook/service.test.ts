@@ -6,7 +6,7 @@ import { WordBookService } from "./service";
 describe("WordBookService", () => {
   it("should create a word book", async () => {
     const mockWordBookRepository: WordBookRepository = {
-      createWordBook: vi.fn(async (wordBook: WordBook) => wordBook),
+      create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async () => []),
       findWordBookById: vi.fn(async () => null),
     };
@@ -17,9 +17,9 @@ describe("WordBookService", () => {
       title: "My New WordBook",
     };
 
-    const createdWordBook = await service.createWordBook(input);
+    const createdWordBook = await service.create(input);
 
-    expect(mockWordBookRepository.createWordBook).toHaveBeenCalledWith(
+    expect(mockWordBookRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: input.userId,
         title: input.title,
@@ -32,7 +32,7 @@ describe("WordBookService", () => {
 
   it("should find word books by user ID", async () => {
     const mockWordBookRepository: WordBookRepository = {
-      createWordBook: vi.fn(),
+      create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async (userId: number) => [
         WordBook.fromPersistence({ id: 1, userId, title: "Book 1" }),
         WordBook.fromPersistence({ id: 2, userId, title: "Book 2" }),
