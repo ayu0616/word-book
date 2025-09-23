@@ -20,4 +20,8 @@ export class WordBookService {
   async deleteWordBook(id: number): Promise<void> {
     await this.repo.delete(id);
   }
+
+  async updateWordBookTitle(id: number, title: string): Promise<void> {
+    await this.repo.updateTitle(id, title);
+  }
 }

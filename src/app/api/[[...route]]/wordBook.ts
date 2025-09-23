@@ -117,4 +117,48 @@ export const WordBookController = new Hono()
         200,
       );
     },
+  )
+  .put(
+    "/:id",
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().transform(Number),
+      }),
+    ),
+    zValidator(
+      "json",
+      z.object({
+        title: z.string().min(1).max(255),
+      }),
+    ),
+    async (c) => {
+      const sid = getCookie(c, SESSION_COOKIE);
+      if (!sid) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const me = await authService.me(sid);
+      if (!me.ok || !me.user) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const { id } = c.req.valid("param");
+      const { title } = c.req.valid("json");
+
+      const existingWordBook = await service.findWordBookById(id);
+      if (!existingWordBook) {
+        return c.json({ ok: false, error: "word_book_not_found" }, 404);
+      }
+
+      if (existingWordBook.userId !== me.user.id) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      await service.updateWordBookTitle(id, title);
+      return c.json(
+        { ok: true, message: "Word book updated successfully" },
+        200,
+      );
+    },
   );

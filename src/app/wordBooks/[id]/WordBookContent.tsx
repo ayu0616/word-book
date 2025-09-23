@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { EditWordBookTitleModal } from "@/components/EditWordBookTitleModal";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
 
@@ -20,19 +21,21 @@ interface Word {
 }
 
 export default function WordBookContent({
-  wordBook,
+  wordBook: initialWordBook,
   words: initialWords,
 }: {
   wordBook: WordBook;
   words: Word[];
 }) {
+  const [wordBook, setWordBook] = useState(initialWordBook);
   const [words, setWords] = useState(initialWords);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWordModalOpen, setIsWordModalOpen] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
+  const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
 
   const handleEditClick = (word: Word) => {
     setEditingWord(word);
-    setIsModalOpen(true);
+    setIsWordModalOpen(true);
   };
 
   const handleSaveWord = (updatedWord: {
@@ -45,12 +48,12 @@ export default function WordBookContent({
         word.id === updatedWord.id ? { ...word, ...updatedWord } : word,
       ),
     );
-    setIsModalOpen(false);
+    setIsWordModalOpen(false);
     setEditingWord(null);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseWordModal = () => {
+    setIsWordModalOpen(false);
     setEditingWord(null);
   };
 
@@ -76,9 +79,27 @@ export default function WordBookContent({
     }
   }, []);
 
+  const handleEditTitleClick = () => {
+    setIsTitleModalOpen(true);
+  };
+
+  const handleSaveTitle = (newTitle: string) => {
+    setWordBook((prevWordBook) => ({ ...prevWordBook, title: newTitle }));
+    setIsTitleModalOpen(false);
+  };
+
+  const handleCloseTitleModal = () => {
+    setIsTitleModalOpen(false);
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{wordBook.title}</h1>
+      <div className="flex items-center mb-4">
+        <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
+        <Button variant="outline" size="sm" onClick={handleEditTitleClick}>
+          Edit Title
+        </Button>
+      </div>
       <p className="mb-4">単語帳ID: {wordBook.id}</p>
       <p className="mb-4">単語数: {words.length}</p>
 
@@ -135,12 +156,20 @@ export default function WordBookContent({
 
       {editingWord && (
         <EditWordModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
+          isOpen={isWordModalOpen}
+          onClose={handleCloseWordModal}
           word={editingWord}
           onSave={handleSaveWord}
         />
       )}
+
+      <EditWordBookTitleModal
+        isOpen={isTitleModalOpen}
+        onClose={handleCloseTitleModal}
+        wordBookId={wordBook.id}
+        currentTitle={wordBook.title}
+        onSave={handleSaveTitle}
+      />
     </div>
   );
 }
