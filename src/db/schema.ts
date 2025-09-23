@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { pgEnum, pgTable } from "drizzle-orm/pg-core";
 
 export const learningResultEnum = pgEnum("learning_result_enum", [
@@ -32,10 +31,14 @@ export const words = pgTable("words", (t) => ({
   term: t.varchar("term", { length: 255 }).notNull(),
   meaning: t.text("meaning").notNull(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
-}));
-
-export const wordsRelations = relations(words, ({ many }) => ({
-  learningRecords: many(learningRecords),
+  consecutiveCorrectCount: t
+    .integer("consecutive_correct_count")
+    .default(0)
+    .notNull(),
+  nextReviewDate: t
+    .timestamp("next_review_date", { mode: "date" })
+    .defaultNow()
+    .notNull(),
 }));
 
 export const sessions = pgTable("sessions", (t) => ({
@@ -44,30 +47,3 @@ export const sessions = pgTable("sessions", (t) => ({
   expiresAt: t.timestamp("expires_at").notNull(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 }));
-
-export const learningRecords = pgTable("learning_records", (t) => ({
-  id: t.serial("id").primaryKey(),
-  wordId: t
-    .integer("word_id")
-    .references(() => words.id)
-    .notNull(),
-  recordDate: t.timestamp("record_date").defaultNow().notNull(),
-  result: learningResultEnum("result").notNull(),
-  consecutiveCorrectCount: t
-    .integer("consecutive_correct_count")
-    .default(0)
-    .notNull(),
-  nextReviewDate: t.timestamp("next_review_date").defaultNow().notNull(),
-  createdAt: t.timestamp("created_at").defaultNow().notNull(),
-  updatedAt: t.timestamp("updated_at").defaultNow().notNull(),
-}));
-
-export const learningRecordsRelations = relations(
-  learningRecords,
-  ({ one }) => ({
-    word: one(words, {
-      fields: [learningRecords.wordId],
-      references: [words.id],
-    }),
-  }),
-);

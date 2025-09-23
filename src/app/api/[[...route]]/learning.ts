@@ -4,11 +4,15 @@ import { handle } from "hono/vercel";
 import { z } from "zod";
 import { LearningRecordService } from "@/application/learningRecord/service";
 import { DrizzleLearningRecordRepository } from "@/infrastructure/learningRecord/repository.drizzle";
+import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
 
 const app = new Hono().basePath("/api");
 
+const learningRecordRepository = new DrizzleLearningRecordRepository();
+const wordRepository = new DrizzleWordRepository();
 const learningRecordService = new LearningRecordService(
-  new DrizzleLearningRecordRepository(),
+  learningRecordRepository,
+  wordRepository,
 );
 
 export const learningRoutes = app
@@ -47,11 +51,11 @@ export const learningRoutes = app
     ),
     async (c) => {
       const { wordId, result } = c.req.valid("json");
-      const learningRecord = await learningRecordService.recordLearningResult({
+      await learningRecordService.recordLearningResult({
         wordId,
         result,
       });
-      return c.json(learningRecord);
+      return c.json({ message: "Learning record updated" });
     },
   );
 

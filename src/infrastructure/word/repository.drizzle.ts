@@ -21,7 +21,28 @@ export class DrizzleWordRepository implements WordRepository {
       term: newWord.term,
       meaning: newWord.meaning,
       createdAt: newWord.createdAt,
+      consecutiveCorrectCount: newWord.consecutiveCorrectCount,
+      nextReviewDate: newWord.nextReviewDate,
     });
+  }
+
+  async findById(id: number): Promise<Word | undefined> {
+    const [result] = await db
+      .select()
+      .from(words)
+      .where(eq(words.id, id))
+      .limit(1);
+    return result
+      ? Word.fromPersistence({
+          id: result.id,
+          wordBookId: result.wordBookId,
+          term: result.term,
+          meaning: result.meaning,
+          createdAt: result.createdAt,
+          consecutiveCorrectCount: result.consecutiveCorrectCount,
+          nextReviewDate: result.nextReviewDate,
+        })
+      : undefined;
   }
 
   async findWordsByWordBookId(wordBookId: number): Promise<Word[]> {
@@ -29,6 +50,16 @@ export class DrizzleWordRepository implements WordRepository {
       .select()
       .from(words)
       .where(eq(words.wordBookId, wordBookId));
-    return result.map((w) => Word.fromPersistence(w));
+    return result.map((w) =>
+      Word.fromPersistence({
+        id: w.id,
+        wordBookId: w.wordBookId,
+        term: w.term,
+        meaning: w.meaning,
+        createdAt: w.createdAt,
+        consecutiveCorrectCount: w.consecutiveCorrectCount,
+        nextReviewDate: w.nextReviewDate,
+      }),
+    );
   }
 }

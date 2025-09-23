@@ -3,19 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { LearningRecord } from "@/domain/learningRecord/entities";
-import type { Word } from "@/domain/word/entities";
+import type { words } from "@/db/schema";
 
 type LearnContentProps = {
-  initialWords: { learningRecord: LearningRecord; word: Word }[];
+  initialWords: (typeof words.$inferSelect)[];
 };
 
 export function LearnContent({ initialWords }: LearnContentProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [currentWordData, setCurrentWordData] = useState<{
-    learningRecord: LearningRecord;
-    word: Word;
-  } | null>(null);
+  const [currentWordData, setCurrentWordData] = useState<
+    typeof words.$inferSelect | null
+  >(null);
   const [showMeaning, setShowMeaning] = useState(false);
   const [loading, setLoading] = useState(true); // Still need loading for initial state
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +50,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ wordId: currentWordData.word.id, result }),
+        body: JSON.stringify({ wordId: currentWordData.id, result }),
       });
       if (!response.ok) {
         throw new Error("Failed to record learning result.");
@@ -79,10 +77,10 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle>{currentWordData.word.term}</CardTitle>
+        <CardTitle>{currentWordData.term}</CardTitle>
       </CardHeader>
       <CardContent>
-        {showMeaning && <p className="mb-4">{currentWordData.word.meaning}</p>}
+        {showMeaning && <p className="mb-4">{currentWordData.meaning}</p>}
         <div className="flex justify-between">
           {!showMeaning && (
             <Button onClick={handleShowAnswer}>Show Answer</Button>
