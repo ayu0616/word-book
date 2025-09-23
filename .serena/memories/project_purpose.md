@@ -1,0 +1,1 @@
+This is a Next.js application named 'word-book', likely designed for managing a collection of words or vocabulary. It's a full-stack application with a React frontend and a Hono/Drizzle ORM backend.
