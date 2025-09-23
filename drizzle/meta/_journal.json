@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1758542339764,
-      "tag": "0000_outstanding_giant_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1758544165946,
-      "tag": "0001_oval_mathemanic",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1758549648617,
-      "tag": "0002_slim_thunderbolts",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1758588080521,
-      "tag": "0003_third_stone_men",
+      "when": 1758600877299,
+      "tag": "0000_round_hex",
       "breakpoints": true
     }
   ]

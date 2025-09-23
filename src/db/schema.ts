@@ -1,4 +1,9 @@
-import { pgTable } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable } from "drizzle-orm/pg-core";
+
+export const learningResultEnum = pgEnum("learning_result_enum", [
+  "correct",
+  "incorrect",
+]);
 
 export const users = pgTable("users", (t) => ({
   id: t.serial("id").primaryKey(),
@@ -33,4 +38,16 @@ export const sessions = pgTable("sessions", (t) => ({
   userId: t.integer("user_id").notNull(),
   expiresAt: t.timestamp("expires_at").notNull(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
+}));
+
+export const learningRecords = pgTable("learning_records", (t) => ({
+  id: t.serial("id").primaryKey(),
+  wordId: t
+    .integer("word_id")
+    .references(() => words.id)
+    .notNull(),
+  recordDate: t.timestamp("record_date").defaultNow().notNull(),
+  result: learningResultEnum("result").notNull(),
+  createdAt: t.timestamp("created_at").defaultNow().notNull(),
+  updatedAt: t.timestamp("updated_at").defaultNow().notNull(),
 }));

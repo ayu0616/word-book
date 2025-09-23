@@ -55,8 +55,15 @@ class InMemoryRepo implements AuthRepository {
 
   // test helpers
   expireSession(id: string) {
-    const s = this.sessions.find((x) => x.id === id);
-    if (s) (s as any).expiresAt = new Date(Date.now() - 1000);
+    const index = this.sessions.findIndex((x) => x.id === id);
+    if (index !== -1) {
+      const s = this.sessions[index];
+      const updatedSession = new Session({
+        ...s,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+      this.sessions[index] = updatedSession;
+    }
   }
   createOrphanSession(id: string, userId: number) {
     const s = new Session({
