@@ -16,15 +16,35 @@ const authRepo = new DrizzleAuthRepository();
 const authHasher = new BcryptPasswordHasher();
 const authService = new AuthService(authRepo, authHasher, 0); // Session TTL not relevant here
 
-export const WordBookController = new Hono().post(
-  "/create",
-  zValidator(
-    "json",
-    z.object({
-      title: z.string().min(1).max(255),
-    }),
-  ),
-  async (c) => {
+export const WordBookController = new Hono()
+  .post(
+    "/create",
+    zValidator(
+      "json",
+      z.object({
+        title: z.string().min(1).max(255),
+      }),
+    ),
+    async (c) => {
+      const sid = getCookie(c, SESSION_COOKIE);
+      if (!sid) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const me = await authService.me(sid);
+      if (!me.ok || !me.user) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const { title } = c.req.valid("json");
+      const wordBook = await service.createWordBook({
+        userId: me.user.id,
+        title,
+      });
+      return c.json({ ok: true, wordBook }, 201);
+    },
+  )
+  .get("/list", async (c) => {
     const sid = getCookie(c, SESSION_COOKIE);
     if (!sid) {
       return c.json({ ok: false, error: "unauthorized" }, 401);
@@ -35,11 +55,6 @@ export const WordBookController = new Hono().post(
       return c.json({ ok: false, error: "unauthorized" }, 401);
     }
 
-    const { title } = c.req.valid("json");
-    const wordBook = await service.createWordBook({
-      userId: me.user.id,
-      title,
-    });
-    return c.json({ ok: true, wordBook }, 201);
-  },
-);
+    const wordBooks = await service.findWordBooksByUserId(me.user.id);
+    return c.json({ ok: true, wordBooks }, 200);
+  });
