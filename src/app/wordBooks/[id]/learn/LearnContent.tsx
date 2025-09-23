@@ -7,50 +7,44 @@ import type { LearningRecord } from "@/domain/learningRecord/entities";
 import type { Word } from "@/domain/word/entities";
 
 type LearnContentProps = {
-  wordBookId: number;
+  initialWords: { learningRecord: LearningRecord; word: Word }[];
 };
 
-export function LearnContent({ wordBookId }: LearnContentProps) {
-  const [word, setWord] = useState<Word | null>(null);
+export function LearnContent({ initialWords }: LearnContentProps) {
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentWordData, setCurrentWordData] = useState<{
+    learningRecord: LearningRecord;
+    word: Word;
+  } | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Still need loading for initial state
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNextWord = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    setShowMeaning(false);
-    try {
-      const response = await fetch(
-        `/api/learning/word-book/${wordBookId}?limit=1`,
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch next word.");
-      }
-      const data: { learningRecord: LearningRecord; word: Word }[] =
-        await response.json();
-      if (data.length > 0) {
-        setWord(data[0].word);
-      } else {
-        setWord(null);
-      }
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [wordBookId]);
-
   useEffect(() => {
-    fetchNextWord();
-  }, [fetchNextWord]);
+    if (initialWords.length > 0) {
+      setCurrentWordData(initialWords[currentWordIndex]);
+      setLoading(false);
+    } else {
+      setLoading(false);
+      setCurrentWordData(null); // No words to learn
+    }
+  }, [initialWords, currentWordIndex]);
+
+  const moveToNextWord = useCallback(() => {
+    setShowMeaning(false);
+    if (currentWordIndex < initialWords.length - 1) {
+      setCurrentWordIndex((prevIndex) => prevIndex + 1);
+    } else {
+      setCurrentWordData(null); // All words learned
+    }
+  }, [currentWordIndex, initialWords]);
 
   const handleShowAnswer = () => {
     setShowMeaning(true);
   };
 
   const handleRecordResult = async (result: "correct" | "incorrect") => {
-    if (!word) return;
+    if (!currentWordData) return;
 
     try {
       const response = await fetch("/api/learning/record", {
@@ -58,17 +52,15 @@ export function LearnContent({ wordBookId }: LearnContentProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ wordId: word.id, result }),
+        body: JSON.stringify({ wordId: currentWordData.word.id, result }),
       });
       if (!response.ok) {
         throw new Error("Failed to record learning result.");
       }
-      // After recording, fetch the next word
-      fetchNextWord();
+      // After recording, move to the next word in the local list
+      moveToNextWord();
     } catch (err) {
       setError((err as Error).message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -80,17 +72,17 @@ export function LearnContent({ wordBookId }: LearnContentProps) {
     return <p className="text-red-500">Error: {error}</p>;
   }
 
-  if (!word) {
-    return <p>No words to learn in this word book.</p>;
+  if (!currentWordData) {
+    return <p>No more words to learn in this word book.</p>;
   }
 
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle>{word.term}</CardTitle>
+        <CardTitle>{currentWordData.word.term}</CardTitle>
       </CardHeader>
       <CardContent>
-        {showMeaning && <p className="mb-4">{word.meaning}</p>}
+        {showMeaning && <p className="mb-4">{currentWordData.word.meaning}</p>}
         <div className="flex justify-between">
           {!showMeaning && (
             <Button onClick={handleShowAnswer}>Show Answer</Button>
