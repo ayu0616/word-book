@@ -8,18 +8,24 @@ export const users = pgTable("users", (t) => ({
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
 }));
 
+export const wordBooks = pgTable("word_books", (t) => ({
+  id: t.serial("id").primaryKey(),
+  userId: t
+    .serial("user_id")
+    .references(() => users.id)
+    .notNull(),
+  title: t.varchar("title", { length: 255 }).notNull(),
+}));
+
 export const words = pgTable("words", (t) => ({
   id: t.serial("id").primaryKey(),
-  userId: t.integer("user_id").notNull(),
+  wordBookId: t
+    .serial("word_book_id")
+    .references(() => wordBooks.id)
+    .notNull(),
   term: t.varchar("term", { length: 255 }).notNull(),
   meaning: t.text("meaning").notNull(),
   createdAt: t.timestamp("created_at").defaultNow().notNull(),
-}));
-
-export const posts = pgTable("post", (t) => ({
-  id: t.text("id").notNull().primaryKey(),
-  text: t.text("text").notNull(),
-  createdAt: t.timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
 }));
 
 export const sessions = pgTable("sessions", (t) => ({
