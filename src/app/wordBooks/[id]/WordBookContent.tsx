@@ -18,6 +18,7 @@ interface Word {
   term: string;
   meaning: string;
   createdAt: string;
+  nextReviewDate: string;
 }
 
 export default function WordBookContent({
@@ -118,6 +119,10 @@ export default function WordBookContent({
                 <p className="text-gray-600">{word.meaning}</p>
                 <p className="text-sm text-gray-500">
                   作成日: {new Date(word.createdAt).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  次回の復習日:{" "}
+                  {new Date(word.nextReviewDate).toLocaleDateString()}
                 </p>
               </div>
               <Button
