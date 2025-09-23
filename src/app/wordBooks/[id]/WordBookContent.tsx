@@ -80,6 +80,7 @@ export default function WordBookContent({
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{wordBook.title}</h1>
       <p className="mb-4">単語帳ID: {wordBook.id}</p>
+      <p className="mb-4">単語数: {words.length}</p>
 
       <h2 className="text-xl font-semibold mb-3">単語リスト</h2>
       {words.length === 0 ? (
