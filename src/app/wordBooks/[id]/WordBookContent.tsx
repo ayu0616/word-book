@@ -19,6 +19,7 @@ interface Word {
   meaning: string;
   createdAt: string;
   nextReviewDate: string;
+  consecutiveCorrectCount: number;
 }
 
 export default function WordBookContent({
@@ -123,6 +124,9 @@ export default function WordBookContent({
                 <p className="text-sm text-gray-500">
                   次回の復習日:{" "}
                   {new Date(word.nextReviewDate).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  連続正解数: {word.consecutiveCorrectCount}
                 </p>
               </div>
               <Button
