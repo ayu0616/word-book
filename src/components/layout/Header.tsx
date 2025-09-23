@@ -1,50 +1,23 @@
-"use client";
-
+import { cookies } from "next/headers";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { client } from "@/lib/hono";
+import { AuthService } from "@/application/auth/service";
+import { BcryptPasswordHasher } from "@/infrastructure/auth/passwordHasher.bcrypt";
+import { DrizzleAuthRepository } from "@/infrastructure/auth/repository.drizzle";
+import { SESSION_COOKIE } from "@/lib/constants";
+import HeaderContent from "./HeaderContent";
 
-export default function Header() {
-  const router = useRouter();
-  const [user, setUser] = useState<{
-    id: number;
-    email: string;
-    name: string | null;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+export default async function Header() {
+  const authRepo = new DrizzleAuthRepository();
+  const authHasher = new BcryptPasswordHasher();
+  const authService = new AuthService(authRepo, authHasher, 0);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await client.auth.me.$get();
-        const data = await res.json();
-        if (data.ok) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (_err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
+  const sid = (await cookies()).get(SESSION_COOKIE)?.value;
+  const me = await authService.me(sid || null);
 
-  const handleLogout = async () => {
-    try {
-      const res = await client.auth.logout.$post({});
-      if (res.ok) {
-        router.push("/login");
-        router.refresh();
-      }
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
+  let user = null;
+  if (me.ok && me.user) {
+    user = me.user;
+  }
 
   return (
     <header className="bg-gray-800 text-white p-4 shadow-md">
@@ -52,45 +25,7 @@ export default function Header() {
         <Link href="/">
           <span className="text-xl font-bold cursor-pointer">単語帳アプリ</span>
         </Link>
-        <nav className="space-x-4">
-          {loading ? (
-            <span>読み込み中...</span>
-          ) : user ? (
-            <>
-              <span>ようこそ, {user.name || user.email}</span>
-              <Link href="/wordBooks/new">
-                <Button variant="ghost" className="text-white">
-                  新しい単語帳
-                </Button>
-              </Link>
-              <Link href="/words/new">
-                <Button variant="ghost" className="text-white">
-                  新しい単語
-                </Button>
-              </Link>
-              <Button
-                variant="ghost"
-                className="text-white"
-                onClick={handleLogout}
-              >
-                ログアウト
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button variant="ghost" className="text-white">
-                  ログイン
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button variant="ghost" className="text-white">
-                  新規登録
-                </Button>
-              </Link>
-            </>
-          )}
-        </nav>
+        <HeaderContent user={user} />
       </div>
     </header>
   );
