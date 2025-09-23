@@ -1,82 +1,35 @@
-"use client";
+import { cookies } from "next/headers";
+import { AuthService } from "@/application/auth/service";
+import { WordBookService } from "@/application/wordBook/service";
+import { BcryptPasswordHasher } from "@/infrastructure/auth/passwordHasher.bcrypt";
+import { DrizzleAuthRepository } from "@/infrastructure/auth/repository.drizzle";
+import { DrizzleWordBookRepository } from "@/infrastructure/wordBook/repository.drizzle";
+import { SESSION_COOKIE } from "@/lib/constants";
+import HomeContent from "./HomeContent";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { client } from "@/lib/hono";
+export default async function HomePage() {
+  const authRepo = new DrizzleAuthRepository();
+  const authHasher = new BcryptPasswordHasher();
+  const authService = new AuthService(authRepo, authHasher, 0);
 
-interface WordBook {
-  id: number;
-  userId: number;
-  title: string;
-}
+  const wordBookRepo = new DrizzleWordBookRepository();
+  const wordBookService = new WordBookService(wordBookRepo);
 
-export default function HomePage() {
-  const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const sid = (await cookies()).get(SESSION_COOKIE)?.value;
+  const me = await authService.me(sid || null);
 
-  useEffect(() => {
-    const fetchWordBooks = async () => {
-      try {
-        const res = await client.wordBook.list.$get();
-        const data = await res.json();
-        if (data.ok) {
-          setWordBooks(data.wordBooks);
-        } else {
-          setError(data.error ?? "単語帳の取得に失敗しました");
-        }
-      } catch (_err) {
-        setError("ネットワークエラーが発生しました");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchWordBooks();
-  }, []);
+  let wordBooks: { id: number; userId: number; title: string }[] = [];
+  let error: string | null = null;
 
-  if (loading) {
-    return <div className="container mx-auto p-4">読み込み中...</div>;
+  if (me.ok && me.user) {
+    try {
+      wordBooks = await wordBookService.findWordBooksByUserId(me.user.id);
+    } catch (_err) {
+      error = "単語帳の取得に失敗しました";
+    }
+  } else {
+    error = "認証されていません";
   }
 
-  if (error) {
-    return (
-      <div className="container mx-auto p-4 text-red-600">エラー: {error}</div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">あなたの単語帳</h1>
-      {wordBooks.length === 0 ? (
-        <p>単語帳がありません。新しい単語帳を作成しましょう！</p>
-      ) : (
-        <ul className="space-y-2">
-          {wordBooks.map((wordBook) => (
-            <li key={wordBook.id} className="p-3 border rounded-md shadow-sm">
-              <Link
-                href={`/wordBooks/${wordBook.id}`}
-                className="text-blue-600 hover:underline"
-              >
-                {wordBook.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-6 space-x-4">
-        <Link
-          href="/wordBooks/new"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          新しい単語帳を作成
-        </Link>
-        <Link
-          href="/words/new"
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          新しい単語を登録
-        </Link>
-      </div>
-    </div>
-  );
+  return <HomeContent wordBooks={wordBooks} error={error} />;
 }
