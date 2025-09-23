@@ -8,6 +8,7 @@ describe("WordBookService", () => {
     const mockWordBookRepository: WordBookRepository = {
       createWordBook: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async () => []),
+      findWordBookById: vi.fn(async () => null),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -36,6 +37,7 @@ describe("WordBookService", () => {
         WordBook.fromPersistence({ id: 1, userId, title: "Book 1" }),
         WordBook.fromPersistence({ id: 2, userId, title: "Book 2" }),
       ]),
+      findWordBookById: vi.fn(async () => null),
     };
     const service = new WordBookService(mockWordBookRepository);
 

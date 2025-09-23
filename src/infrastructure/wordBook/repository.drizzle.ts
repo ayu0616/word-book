@@ -27,4 +27,13 @@ export class DrizzleWordBookRepository implements WordBookRepository {
       .where(eq(wordBooks.userId, userId));
     return result.map((wb) => WordBook.fromPersistence(wb));
   }
+
+  async findWordBookById(id: number): Promise<WordBook | null> {
+    const [result] = await db
+      .select()
+      .from(wordBooks)
+      .where(eq(wordBooks.id, id));
+    if (!result) return null;
+    return WordBook.fromPersistence(result);
+  }
 }

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -15,23 +15,61 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Assuming you have a Textarea component
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { client } from "@/lib/hono";
 
 const formSchema = z.object({
+  wordBookId: z
+    .number({ message: "単語帳を選択してください。" })
+    .min(1, { message: "単語帳を選択してください。" }),
   term: z.string().min(1, { message: "単語を入力してください。" }).max(255),
   meaning: z.string().min(1, { message: "意味を入力してください。" }),
 });
 
 type WordFormValues = z.infer<typeof formSchema>;
 
+interface WordBook {
+  id: number;
+  userId: number;
+  title: string;
+}
+
 export default function NewWordPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
+  const [loadingWordBooks, setLoadingWordBooks] = useState(true);
+
+  useEffect(() => {
+    const fetchWordBooks = async () => {
+      try {
+        const res = await client.wordBook.list.$get();
+        const data = await res.json();
+        if (data.ok) {
+          setWordBooks(data.wordBooks);
+        } else {
+          setError(data.error ?? "単語帳の取得に失敗しました");
+        }
+      } catch (_err) {
+        setError("ネットワークエラーが発生しました");
+      } finally {
+        setLoadingWordBooks(false);
+      }
+    };
+    fetchWordBooks();
+  }, []);
 
   const form = useForm<WordFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      wordBookId: undefined, // Set initial value to undefined
       term: "",
       meaning: "",
     },
@@ -58,6 +96,46 @@ export default function NewWordPage() {
       <h1 className="mb-6 text-2xl font-semibold">新しい単語を登録</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="wordBookId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>単語帳</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={field.value ? String(field.value) : undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="単語帳を選択" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {loadingWordBooks ? (
+                      <SelectItem value="-" disabled>
+                        読み込み中...
+                      </SelectItem>
+                    ) : wordBooks.length === 0 ? (
+                      <SelectItem value="-" disabled>
+                        単語帳がありません
+                      </SelectItem>
+                    ) : (
+                      wordBooks.map((wordBook) => (
+                        <SelectItem
+                          key={wordBook.id}
+                          value={String(wordBook.id)}
+                        >
+                          {wordBook.title}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="term"
@@ -88,7 +166,7 @@ export default function NewWordPage() {
           <Button
             type="submit"
             className="w-full"
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || loadingWordBooks}
           >
             {form.formState.isSubmitting ? "登録中..." : "登録"}
           </Button>

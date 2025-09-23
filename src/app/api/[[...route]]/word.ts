@@ -26,6 +26,7 @@ export const WordController = new Hono().post(
   zValidator(
     "json",
     z.object({
+      wordBookId: z.number(),
       term: z.string().min(1).max(255),
       meaning: z.string().min(1),
     }),
@@ -41,16 +42,13 @@ export const WordController = new Hono().post(
       return c.json({ ok: false, error: "unauthorized" }, 401);
     }
 
-    const userWordBooks = await wordBookService.findWordBooksByUserId(
-      me.user.id,
-    );
-    if (userWordBooks.length === 0) {
-      return c.json({ ok: false, error: "no_word_books_found" }, 400);
+    const { wordBookId, term, meaning } = c.req.valid("json");
+
+    const wordBook = await wordBookService.findWordBookById(wordBookId);
+    if (!wordBook || wordBook.userId !== me.user.id) {
+      return c.json({ ok: false, error: "word_book_not_found" }, 400);
     }
 
-    const wordBookId = userWordBooks[0].id; // Use the first word book found
-
-    const { term, meaning } = c.req.valid("json");
     const word = await wordService.createWord({ wordBookId, term, meaning });
     return c.json({ ok: true, word }, 201);
   },

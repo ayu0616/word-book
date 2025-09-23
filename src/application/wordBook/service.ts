@@ -15,4 +15,8 @@ export class WordBookService {
   async findWordBooksByUserId(userId: number): Promise<WordBook[]> {
     return this.repo.findWordBooksByUserId(userId);
   }
+
+  async findWordBookById(id: number): Promise<WordBook | null> {
+    return this.repo.findWordBookById(id);
+  }
 }
