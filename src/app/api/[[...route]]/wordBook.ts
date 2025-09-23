@@ -57,4 +57,27 @@ export const WordBookController = new Hono()
 
     const wordBooks = await service.findWordBooksByUserId(me.user.id);
     return c.json({ ok: true, wordBooks }, 200);
+  })
+  .get("/get/:id", async (c) => {
+    const sid = getCookie(c, SESSION_COOKIE);
+    if (!sid) {
+      return c.json({ ok: false, error: "unauthorized" }, 401);
+    }
+
+    const me = await authService.me(sid);
+    if (!me.ok || !me.user) {
+      return c.json({ ok: false, error: "unauthorized" }, 401);
+    }
+
+    const id = Number.parseInt(c.req.param("id"), 10);
+    if (Number.isNaN(id)) {
+      return c.json({ ok: false, error: "invalid_id" }, 400);
+    }
+
+    const wordBook = await service.findWordBookById(id);
+    if (!wordBook || wordBook.userId !== me.user.id) {
+      return c.json({ ok: false, error: "word_book_not_found" }, 404);
+    }
+
+    return c.json({ ok: true, wordBook }, 200);
   });

@@ -7,6 +7,22 @@ describe("WordService", () => {
   it("should create a word", async () => {
     const mockWordRepository: WordRepository = {
       createWord: vi.fn(async (word: Word) => word),
+      findWordsByWordBookId: vi.fn(async (wordBookId: number) => [
+        Word.fromPersistence({
+          id: 1,
+          wordBookId,
+          term: "Word 1",
+          meaning: "Meaning 1",
+          createdAt: new Date(),
+        }),
+        Word.fromPersistence({
+          id: 2,
+          wordBookId,
+          term: "Word 2",
+          meaning: "Meaning 2",
+          createdAt: new Date(),
+        }),
+      ]),
     };
     const service = new WordService(mockWordRepository);
 

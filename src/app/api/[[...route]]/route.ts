@@ -18,7 +18,9 @@ const app = new Hono()
       path === "/api/auth/signup" ||
       path === "/api/word/create" ||
       path === "/api/wordBook/create" ||
-      path === "/api/wordBook/list"
+      path === "/api/wordBook/list" ||
+      path.startsWith("/api/wordBook/get/") ||
+      path.startsWith("/api/word/list/")
     ) {
       await next();
       return;

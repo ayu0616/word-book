@@ -4,7 +4,7 @@ import type { AppType } from "@/app/api/[[...route]]/route";
 
 export const getServerClient = async () => {
   const cookieStore = await cookies();
-  return hc<AppType>("/", {
+  return hc<AppType>("http://localhost:3000/", {
     headers: {
       Cookie: cookieStore.toString(),
     },

@@ -12,4 +12,8 @@ export class WordService {
     const word = Word.create(input);
     return this.repo.createWord(word);
   }
+
+  async findWordsByWordBookId(wordBookId: number): Promise<Word[]> {
+    return this.repo.findWordsByWordBookId(wordBookId);
+  }
 }

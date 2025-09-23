@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import type { WordRepository } from "@/application/word/ports";
 import { db } from "@/db";
 import { words } from "@/db/schema";
@@ -21,5 +22,13 @@ export class DrizzleWordRepository implements WordRepository {
       meaning: newWord.meaning,
       createdAt: newWord.createdAt,
     });
+  }
+
+  async findWordsByWordBookId(wordBookId: number): Promise<Word[]> {
+    const result = await db
+      .select()
+      .from(words)
+      .where(eq(words.wordBookId, wordBookId));
+    return result.map((w) => Word.fromPersistence(w));
   }
 }
