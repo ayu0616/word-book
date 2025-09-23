@@ -42,6 +42,7 @@ describe("WordService", () => {
         }),
       ]),
       update: vi.fn(async (_word: Word) => {}),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordService(mockWordRepository);
 
@@ -85,6 +86,7 @@ describe("WordService", () => {
       }),
       findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
       update: vi.fn(async (_word: Word) => {}),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordService(mockWordRepository);
 
@@ -125,6 +127,7 @@ describe("WordService", () => {
         }),
       ]),
       update: vi.fn(async (_word: Word) => {}),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordService(mockWordRepository);
 
@@ -157,6 +160,7 @@ describe("WordService", () => {
       }),
       findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
       update: vi.fn(async (_word: Word) => {}),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordService(mockWordRepository);
 
@@ -174,6 +178,7 @@ describe("WordService", () => {
       findById: vi.fn(async (_id: number) => undefined),
       findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
       update: vi.fn(async (_word: Word) => {}),
+      delete: vi.fn(async (_id: number) => {}),
     };
     const service = new WordService(mockWordRepository);
 
@@ -182,5 +187,21 @@ describe("WordService", () => {
 
     expect(mockWordRepository.findById).toHaveBeenCalledWith(wordId);
     expect(foundWord).toBeUndefined();
+  });
+
+  it("should delete a word", async () => {
+    const mockWordRepository: WordRepository = {
+      createWord: vi.fn(async (word: Word) => word),
+      findById: vi.fn(async (_id: number) => undefined),
+      findWordsByWordBookId: vi.fn(async (_wordBookId: number) => []),
+      update: vi.fn(async (_word: Word) => {}),
+      delete: vi.fn(async (_id: number) => {}),
+    };
+    const service = new WordService(mockWordRepository);
+
+    const wordId = 1;
+    await service.deleteWord(wordId);
+
+    expect(mockWordRepository.delete).toHaveBeenCalledWith(wordId);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
 
@@ -54,6 +54,28 @@ export default function WordBookContent({
     setEditingWord(null);
   };
 
+  const handleDeleteClick = useCallback(async (wordId: number) => {
+    if (!confirm("Are you sure you want to delete this word?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/word/${wordId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete word.");
+      }
+
+      // Update the UI by removing the deleted word
+      setWords((prevWords) => prevWords.filter((word) => word.id !== wordId));
+    } catch (error) {
+      console.error("Error deleting word:", error);
+      // Optionally, display an error message to the user
+    }
+  }, []);
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{wordBook.title}</h1>
@@ -79,6 +101,13 @@ export default function WordBookContent({
                 onClick={() => handleEditClick(word)}
               >
                 Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDeleteClick(word.id)}
+              >
+                Delete
               </Button>
             </li>
           ))}

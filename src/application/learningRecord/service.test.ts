@@ -59,6 +59,10 @@ class InMemoryWordRepository implements WordRepository {
       this.words[index] = word;
     }
   }
+
+  async delete(id: number): Promise<void> {
+    this.words = this.words.filter((word) => word.id !== id);
+  }
 }
 
 class InMemoryLearningRecordRepository implements LearningRecordRepository {

@@ -5,4 +5,5 @@ export interface WordRepository {
   findWordsByWordBookId(wordBookId: number): Promise<Word[]>;
   findById(id: number): Promise<Word | undefined>;
   update(word: Word): Promise<void>;
+  delete(id: number): Promise<void>;
 }

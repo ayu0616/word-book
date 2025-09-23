@@ -122,4 +122,41 @@ export const WordController = new Hono()
       const updatedWord = await wordService.updateWord({ id, term, meaning });
       return c.json({ ok: true, word: updatedWord }, 200);
     },
+  )
+  .delete(
+    "/:id",
+    zValidator(
+      "param",
+      z.object({
+        id: z.string().transform(Number),
+      }),
+    ),
+    async (c) => {
+      const sid = getCookie(c, SESSION_COOKIE);
+      if (!sid) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const me = await authService.me(sid);
+      if (!me.ok || !me.user) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      const { id } = c.req.valid("param");
+
+      const existingWord = await wordService.findById(id);
+      if (!existingWord) {
+        return c.json({ ok: false, error: "word_not_found" }, 404);
+      }
+
+      const wordBook = await wordBookService.findWordBookById(
+        existingWord.wordBookId,
+      );
+      if (!wordBook || wordBook.userId !== me.user.id) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
+
+      await wordService.deleteWord(id);
+      return c.json({ ok: true, message: "Word deleted successfully" }, 200);
+    },
   );
