@@ -11,7 +11,7 @@ const learningRecordService = new LearningRecordService(
   new DrizzleLearningRecordRepository(),
 );
 
-const learningRoutes = app
+export const learningRoutes = app
   .get(
     "/learning/word-book/:wordBookId",
     zValidator(

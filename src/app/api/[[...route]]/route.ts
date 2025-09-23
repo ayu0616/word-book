@@ -3,6 +3,7 @@ import { getCookie } from "hono/cookie";
 import { handle } from "hono/vercel";
 import { SESSION_COOKIE } from "@/lib/constants";
 import { AuthController } from "./auth";
+import { learningRoutes } from "./learning";
 import { TestController } from "./test";
 import { WordController } from "./word";
 import { WordBookController } from "./wordBook";
@@ -20,7 +21,9 @@ const app = new Hono()
       path === "/api/wordBook/create" ||
       path === "/api/wordBook/list" ||
       path.startsWith("/api/wordBook/get/") ||
-      path.startsWith("/api/word/list/")
+      path.startsWith("/api/word/list/") ||
+      path.startsWith("/api/learning/word-book/") ||
+      path === "/api/learning/record"
     ) {
       await next();
       return;
@@ -35,7 +38,8 @@ const app = new Hono()
   .route("/test", TestController)
   .route("/auth", AuthController)
   .route("/word", WordController)
-  .route("/wordBook", WordBookController);
+  .route("/wordBook", WordBookController)
+  .route("/learning", learningRoutes);
 
 export type AppType = typeof app;
 
