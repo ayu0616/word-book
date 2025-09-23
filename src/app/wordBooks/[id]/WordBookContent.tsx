@@ -95,6 +95,9 @@ export default function WordBookContent({
               <div>
                 <p className="font-semibold">{word.term}</p>
                 <p className="text-gray-600">{word.meaning}</p>
+                <p className="text-sm text-gray-500">
+                  作成日: {new Date(word.createdAt).toLocaleDateString()}
+                </p>
               </div>
               <Button
                 variant="outline"
