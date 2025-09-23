@@ -42,7 +42,13 @@ export default function WordBookContent({
         </ul>
       )}
 
-      <div className="mt-6">
+      <div className="mt-6 flex space-x-4">
+        <Link
+          href={`/wordBooks/${wordBook.id}/learn`}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          学習を開始
+        </Link>
         <Link
           href={`/words/new?wordBookId=${wordBook.id}`}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
