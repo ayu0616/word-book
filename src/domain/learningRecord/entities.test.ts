@@ -8,6 +8,8 @@ describe("LearningRecord", () => {
       wordId: 101,
       recordDate: new Date(),
       result: "correct" as const,
+      consecutiveCorrectCount: 0,
+      nextReviewDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -29,6 +31,8 @@ describe("LearningRecord", () => {
       wordId: 102,
       recordDate: now,
       result: "incorrect" as const,
+      consecutiveCorrectCount: 1,
+      nextReviewDate: now,
       createdAt: now,
       updatedAt: now,
     };

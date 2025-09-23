@@ -8,6 +8,13 @@
       "when": 1758600877299,
       "tag": "0000_round_hex",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1758612752329,
+      "tag": "0001_unusual_tigra",
+      "breakpoints": true
     }
   ]
 }
