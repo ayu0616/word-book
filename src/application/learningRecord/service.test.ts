@@ -53,7 +53,6 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
 
   async findWordsToLearn(
     wordBookId: number,
-    limit: number,
   ): Promise<(typeof words.$inferSelect)[]> {
     const now = new Date();
     const filteredWords = this.words.filter((word) => {
@@ -68,7 +67,7 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
       );
     });
 
-    return filteredWords.slice(0, limit);
+    return filteredWords;
   }
 
   async updateWordLearningData(
@@ -183,7 +182,7 @@ describe("LearningRecordService", () => {
       learningRecordRepository.addWord(word1);
       learningRecordRepository.addWord(word2);
 
-      const wordsToLearn = await service.getWordsToLearn(wordBookId, 10);
+      const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(2);
       expect(wordsToLearn[0].id).toBe(wordId1);
@@ -206,7 +205,7 @@ describe("LearningRecordService", () => {
       wordRepository.addWord(masteredWord);
       learningRecordRepository.addWord(masteredWord);
 
-      const wordsToLearn = await service.getWordsToLearn(wordBookId, 10);
+      const wordsToLearn = await service.getWordsToLearn(wordBookId);
       expect(wordsToLearn).toHaveLength(0);
     });
 
@@ -227,7 +226,7 @@ describe("LearningRecordService", () => {
       wordRepository.addWord(newWord);
       learningRecordRepository.addWord(newWord);
 
-      const wordsToLearn = await service.getWordsToLearn(wordBookId, 10);
+      const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(1);
       expect(wordsToLearn[0].id).toBe(wordId);

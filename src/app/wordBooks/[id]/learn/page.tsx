@@ -15,11 +15,8 @@ export default async function LearnPage({
   const wordBookId = (await params).id;
 
   const client = await getServerClient();
-  const res = await client.learning.api.learning["word-book"][
-    ":wordBookId"
-  ].$get({
+  const res = await client.learning["word-book"][":wordBookId"].$get({
     param: { wordBookId },
-    query: {},
   });
 
   if (!res.ok) {
@@ -33,6 +30,8 @@ export default async function LearnPage({
       nextReviewDate: new Date(word.nextReviewDate),
     }))
     .sort(() => Math.random() - 0.5);
+
+  console.log(words);
 
   return <LearnContent initialWords={words} />;
 }

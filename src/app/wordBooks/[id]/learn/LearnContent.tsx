@@ -46,7 +46,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     if (!currentWordData) return;
 
     try {
-      const res = await client.learning.api.learning.record.$post({
+      const res = await client.learning.record.$post({
         json: { wordId: currentWordData.id, result },
       });
       if (!res.ok) {
