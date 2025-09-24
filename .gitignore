@@ -42,3 +42,4 @@ next-env.d.ts
 
 # GitHub App credentials
 gha-creds-*.json
+.gemini/
