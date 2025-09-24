@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { client } from "@/lib/hono";
 
 interface WordBook {
@@ -73,30 +74,24 @@ export default function HomeContent({
                   {wordBook.title}
                 </Link>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="destructive"
                 onClick={() => handleDeleteClick(wordBook.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
               >
                 削除
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
       )}
       <div className="mt-6 space-x-4">
-        <Link
-          href="/wordBooks/new"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          新しい単語帳を作成
-        </Link>
-        <Link
-          href="/words/new"
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          新しい単語を登録
-        </Link>
+        <Button asChild>
+          <Link href="/wordBooks/new">新しい単語帳を作成</Link>
+        </Button>
+        <Button asChild>
+          <Link href="/words/new">新しい単語を登録</Link>
+        </Button>
       </div>
     </div>
   );
