@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -37,10 +38,11 @@ export default function ImportWordsContent({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
-  const { isSubmitting } = form.formState;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (values: FormData) => {
     try {
+      setIsSubmitting(true);
       const res = await client.word.import.$post({
         json: {
           wordBookId: wordBook.id.toString(),
@@ -57,7 +59,7 @@ export default function ImportWordsContent({
       router.refresh();
     } catch (error: unknown) {
       console.error("単語のインポートエラー:", error);
-      // Optionally, display an error message to the user
+      setIsSubmitting(false);
     }
   };
 
