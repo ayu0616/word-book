@@ -8,7 +8,6 @@ export class DrizzleLearningRecordRepository
 {
   async findWordsToLearn(
     wordBookId: number,
-    limit: number,
   ): Promise<(typeof words.$inferSelect)[]> {
     const rows = await db
       .select()
@@ -21,8 +20,7 @@ export class DrizzleLearningRecordRepository
             isNull(words.nextReviewDate),
           ),
         ),
-      )
-      .limit(limit);
+      );
 
     return rows;
   }
