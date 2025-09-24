@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { client } from "@/lib/hono";
 
 interface EditWordModalProps {
   isOpen: boolean;
@@ -67,19 +68,18 @@ export function EditWordModal({
     if (!word) return;
 
     try {
-      const response = await fetch(`/api/word/${word.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await client.word[":id"].$put({
+        json: values,
+        param: {
+          id: word.id.toString(),
         },
-        body: JSON.stringify(values),
       });
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to update word.");
       }
 
-      const updatedWord = await response.json();
+      const updatedWord = await res.json();
       onSave(updatedWord.word); // Assuming the API returns { ok: true, word: updatedWord }
       onClose();
     } catch (error) {
