@@ -30,6 +30,7 @@ export default function NewWordBookContent() {
       title: "",
     },
   });
+  const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: FormData) => {
     try {
@@ -64,7 +65,9 @@ export default function NewWordBookContent() {
               </FormItem>
             )}
           />
-          <Button type="submit">作成</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            作成
+          </Button>
         </form>
       </Form>
     </div>
