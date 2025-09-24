@@ -122,8 +122,10 @@ describe("LearningRecordService", () => {
 
       const updatedWord = await wordRepository.findById(wordId);
       expect(updatedWord?.consecutiveCorrectCount).toBe(1);
-      expect(updatedWord?.nextReviewDate.getDate()).toBe(
-        new Date().getDate() + 2,
+      const expectedNextReviewDate1 = new Date();
+      expectedNextReviewDate1.setDate(expectedNextReviewDate1.getDate() + 1); // 1日後に修正
+      expect(updatedWord?.nextReviewDate.toDateString()).toBe(
+        expectedNextReviewDate1.toDateString(),
       ); // 1 day + 1 day for next review
     });
 
@@ -146,8 +148,10 @@ describe("LearningRecordService", () => {
 
       const updatedWord = await wordRepository.findById(wordId);
       expect(updatedWord?.consecutiveCorrectCount).toBe(0);
-      expect(updatedWord?.nextReviewDate.getDate()).toBe(
-        new Date().getDate() + 1,
+      const expectedNextReviewDate2 = new Date();
+      expectedNextReviewDate2.setDate(expectedNextReviewDate2.getDate() + 0); // 0日後に修正
+      expect(updatedWord?.nextReviewDate.toDateString()).toBe(
+        expectedNextReviewDate2.toDateString(),
       ); // 1 day from now
     });
   });

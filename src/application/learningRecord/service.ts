@@ -9,7 +9,7 @@ export class LearningRecordService {
   ) {}
 
   private calculateNextReviewDate(consecutiveCorrectCount: number): Date {
-    const days = 2 ** consecutiveCorrectCount;
+    const days = Math.floor(2 ** (consecutiveCorrectCount - 1));
     const date = new Date();
     date.setDate(date.getDate() + days);
     return date;
