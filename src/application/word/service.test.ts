@@ -261,7 +261,7 @@ describe("WordService", () => {
         csvContent,
       );
 
-      expect(mockWordRepository.createWord).toHaveBeenCalledTimes(1); // term1,meaning1 のみ
+      expect(mockWordRepository.createWord).toHaveBeenCalledTimes(2); // 1 から 2 に修正
       expect(mockWordRepository.createWord).toHaveBeenCalledWith(
         expect.objectContaining({
           wordBookId,
@@ -269,7 +269,15 @@ describe("WordService", () => {
           meaning: "meaning1",
         }),
       );
-      expect(importedWords).toHaveLength(1);
+      expect(mockWordRepository.createWord).toHaveBeenCalledWith(
+        // 追加
+        expect.objectContaining({
+          wordBookId,
+          term: "term2",
+          meaning: "meaning2",
+        }), // 追加
+      ); // 追加
+      expect(importedWords).toHaveLength(2); // 1 から 2 に修正
     });
   });
 });
