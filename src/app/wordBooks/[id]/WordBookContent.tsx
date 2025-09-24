@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { EditWordModal } from "@/components/EditWordModal";
@@ -96,6 +97,9 @@ export default function WordBookContent({
               <div>
                 <p className="font-semibold">{word.term}</p>
                 <p className="text-gray-600">{word.meaning}</p>
+                <p className="text-sm text-gray-500">
+                  作成日: {format(new Date(word.createdAt), "yyyy-MM-dd")}
+                </p>
               </div>
               <div className="flex gap-2 items-center">
                 <Button
