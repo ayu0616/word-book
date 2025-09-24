@@ -6,8 +6,6 @@ import { LearningRecordService } from "@/application/learningRecord/service";
 import { DrizzleLearningRecordRepository } from "@/infrastructure/learningRecord/repository.drizzle";
 import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
 
-const app = new Hono().basePath("/api");
-
 const learningRecordRepository = new DrizzleLearningRecordRepository();
 const wordRepository = new DrizzleWordRepository();
 const learningRecordService = new LearningRecordService(
@@ -15,33 +13,24 @@ const learningRecordService = new LearningRecordService(
   wordRepository,
 );
 
-export const learningRoutes = app
+export const LearningController = new Hono()
   .get(
-    "/learning/word-book/:wordBookId",
+    "/word-book/:wordBookId",
     zValidator(
       "param",
       z.object({
         wordBookId: z.string().transform(Number),
       }),
     ),
-    zValidator(
-      "query",
-      z.object({
-        limit: z.string().transform(Number).optional().default(1),
-      }),
-    ),
     async (c) => {
       const { wordBookId } = c.req.valid("param");
-      const { limit } = c.req.valid("query");
-      const wordsToLearn = await learningRecordService.getWordsToLearn(
-        wordBookId,
-        limit,
-      );
+      const wordsToLearn =
+        await learningRecordService.getWordsToLearn(wordBookId);
       return c.json(wordsToLearn);
     },
   )
   .post(
-    "/learning/record",
+    "/record",
     zValidator(
       "json",
       z.object({
@@ -59,5 +48,5 @@ export const learningRoutes = app
     },
   );
 
-export const GET = handle(learningRoutes);
-export const POST = handle(learningRoutes);
+export const GET = handle(LearningController);
+export const POST = handle(LearningController);
