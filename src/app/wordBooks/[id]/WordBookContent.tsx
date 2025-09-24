@@ -124,7 +124,7 @@ export default function WordBookContent({
                 </p>
                 <p className="text-sm text-gray-500">
                   次回の復習日:{" "}
-                  {new Date(word.nextReviewDate).toLocaleDateString()}
+                  {format(new Date(word.nextReviewDate), "yyyy-MM-dd")}
                 </p>
               </div>
               <div className="flex gap-2 items-center">
