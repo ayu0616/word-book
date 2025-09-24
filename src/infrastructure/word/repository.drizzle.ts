@@ -62,4 +62,16 @@ export class DrizzleWordRepository implements WordRepository {
       }),
     );
   }
+
+  async update(word: Word): Promise<void> {
+    await db
+      .update(words)
+      .set({
+        term: word.term,
+        meaning: word.meaning,
+        consecutiveCorrectCount: word.consecutiveCorrectCount,
+        nextReviewDate: word.nextReviewDate,
+      })
+      .where(eq(words.id, word.id));
+  }
 }
