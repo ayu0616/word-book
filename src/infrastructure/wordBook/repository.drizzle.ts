@@ -40,4 +40,8 @@ export class DrizzleWordBookRepository implements WordBookRepository {
   async delete(id: number): Promise<void> {
     await db.delete(wordBooks).where(eq(wordBooks.id, id));
   }
+
+  async updateTitle(id: number, title: string): Promise<void> {
+    await db.update(wordBooks).set({ title }).where(eq(wordBooks.id, id));
+  }
 }

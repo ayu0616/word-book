@@ -10,6 +10,7 @@ describe("WordBookService", () => {
       findWordBooksByUserId: vi.fn(async () => []),
       findWordBookById: vi.fn(async () => null),
       delete: vi.fn(async (_id: number) => {}),
+      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -40,6 +41,7 @@ describe("WordBookService", () => {
       ]),
       findWordBookById: vi.fn(async () => null),
       delete: vi.fn(async (_id: number) => {}),
+      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -60,6 +62,7 @@ describe("WordBookService", () => {
       findWordBooksByUserId: vi.fn(async () => []),
       findWordBookById: vi.fn(async () => null),
       delete: vi.fn(async (_id: number) => {}),
+      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -67,5 +70,34 @@ describe("WordBookService", () => {
     await service.deleteWordBook(wordBookId);
 
     expect(mockWordBookRepository.delete).toHaveBeenCalledWith(wordBookId);
+  });
+
+  it("should update a word book title", async () => {
+    const mockWordBookRepository: WordBookRepository = {
+      create: vi.fn(async (wordBook: WordBook) => wordBook),
+      findWordBooksByUserId: vi.fn(async () => []),
+      findWordBookById: vi.fn(async (id: number) => {
+        if (id === 1) {
+          return WordBook.fromPersistence({
+            id: 1,
+            userId: 1,
+            title: "Old Title",
+          });
+        }
+        return null;
+      }),
+      delete: vi.fn(async (_id: number) => {}),
+      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
+    };
+    const service = new WordBookService(mockWordBookRepository);
+
+    const wordBookId = 1;
+    const newTitle = "New Title";
+    await service.updateWordBookTitle(wordBookId, newTitle);
+
+    expect(mockWordBookRepository.updateTitle).toHaveBeenCalledWith(
+      wordBookId,
+      newTitle,
+    );
   });
 });
