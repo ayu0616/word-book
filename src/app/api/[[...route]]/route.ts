@@ -3,7 +3,7 @@ import { getCookie } from "hono/cookie";
 import { handle } from "hono/vercel";
 import { SESSION_COOKIE } from "@/lib/constants";
 import { AuthController } from "./auth";
-import { learningRoutes } from "./learning";
+import { LearningController } from "./learning";
 import { TestController } from "./test";
 import { WordController } from "./word";
 import { WordBookController } from "./wordBook";
@@ -39,7 +39,7 @@ const app = new Hono()
   .route("/auth", AuthController)
   .route("/word", WordController)
   .route("/wordBook", WordBookController)
-  .route("/learning", learningRoutes);
+  .route("/learning", LearningController);
 
 export type AppType = typeof app;
 
