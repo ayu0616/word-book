@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function NewWordBookContent() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,9 +43,13 @@ export default function NewWordBookContent() {
       }
 
       router.push(`/wordBooks/${data.wordBook.id}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("単語帳の作成エラー:", error);
-      // Optionally, display an error message to the user
+      if (error instanceof Error) {
+        setError(error.message ?? "ネットワークエラーが発生しました。");
+      } else {
+        setError("不明なエラーが発生しました。");
+      }
     }
   };
 
@@ -70,6 +76,7 @@ export default function NewWordBookContent() {
           </Button>
         </form>
       </Form>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 }
