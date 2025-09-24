@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { client } from "@/lib/hono";
 
 interface EditWordModalProps {
   isOpen: boolean;
@@ -30,13 +30,13 @@ interface EditWordModalProps {
     id: number;
     term: string;
     meaning: string;
-  } | null;
+  };
   onSave: (updatedWord: { id: number; term: string; meaning: string }) => void;
 }
 
 const formSchema = z.object({
-  term: z.string().min(1, { message: "Term is required." }).max(255),
-  meaning: z.string().min(1, { message: "Meaning is required." }),
+  term: z.string().min(1, { message: "単語は必須です。" }).max(255),
+  meaning: z.string().min(1, { message: "意味は必須です。" }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -50,36 +50,26 @@ export function EditWordModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      term: "",
-      meaning: "",
+      term: word.term,
+      meaning: word.meaning,
     },
   });
-
-  useEffect(() => {
-    if (word) {
-      form.reset({ term: word.term, meaning: word.meaning });
-    } else {
-      form.reset({ term: "", meaning: "" });
-    }
-  }, [word, form]);
+  const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: FormData) => {
-    if (!word) return;
-
     try {
-      const response = await fetch(`/api/word/${word.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await client.word[":id"].$put({
+        json: values,
+        param: {
+          id: word.id.toString(),
         },
-        body: JSON.stringify(values),
       });
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to update word.");
       }
 
-      const updatedWord = await response.json();
+      const updatedWord = await res.json();
       onSave(updatedWord.word); // Assuming the API returns { ok: true, word: updatedWord }
       onClose();
     } catch (error) {
@@ -92,7 +82,7 @@ export function EditWordModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Word</DialogTitle>
+          <DialogTitle>単語を編集</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -101,7 +91,7 @@ export function EditWordModal({
               name="term"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Term</FormLabel>
+                  <FormLabel>単語</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -114,7 +104,7 @@ export function EditWordModal({
               name="meaning"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meaning</FormLabel>
+                  <FormLabel>意味</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
@@ -123,7 +113,9 @@ export function EditWordModal({
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                変更を保存
+              </Button>
             </DialogFooter>
           </form>
         </Form>
