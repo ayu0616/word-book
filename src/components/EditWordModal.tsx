@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,7 @@ interface EditWordModalProps {
     id: number;
     term: string;
     meaning: string;
-  } | null;
+  };
   onSave: (updatedWord: { id: number; term: string; meaning: string }) => void;
 }
 
@@ -51,22 +50,12 @@ export function EditWordModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      term: "",
-      meaning: "",
+      term: word.term,
+      meaning: word.meaning,
     },
   });
 
-  useEffect(() => {
-    if (word) {
-      form.reset({ term: word.term, meaning: word.meaning });
-    } else {
-      form.reset({ term: "", meaning: "" });
-    }
-  }, [word, form]);
-
   const onSubmit = async (values: FormData) => {
-    if (!word) return;
-
     try {
       const res = await client.word[":id"].$put({
         json: values,
