@@ -31,7 +31,5 @@ export default async function LearnPage({
     }))
     .sort(() => Math.random() - 0.5);
 
-  console.log(words);
-
   return <LearnContent initialWords={words} />;
 }
