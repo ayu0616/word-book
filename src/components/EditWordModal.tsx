@@ -54,6 +54,7 @@ export function EditWordModal({
       meaning: word.meaning,
     },
   });
+  const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: FormData) => {
     try {
@@ -112,7 +113,9 @@ export function EditWordModal({
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                Save changes
+              </Button>
             </DialogFooter>
           </form>
         </Form>
