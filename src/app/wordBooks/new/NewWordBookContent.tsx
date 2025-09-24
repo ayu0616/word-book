@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { client } from "@/lib/hono";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }).max(255),
@@ -32,19 +33,12 @@ export default function NewWordBookContent() {
 
   const onSubmit = async (values: FormData) => {
     try {
-      const response = await fetch("/api/wordBook/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create word book.");
+      const res = await client.wordBook.create.$post({ json: values });
+      const data = await res.json();
+      if (!data.ok) {
+        throw new Error(data.error ?? "Failed to create word book.");
       }
 
-      const data = await response.json();
       router.push(`/wordBooks/${data.wordBook.id}`);
     } catch (error) {
       console.error("Error creating word book:", error);
