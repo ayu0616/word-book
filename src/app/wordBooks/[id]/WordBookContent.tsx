@@ -1,10 +1,12 @@
 "use client";
 
+import { format } from "date-fns";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { EditWordBookTitleModal } from "@/components/EditWordBookTitleModal";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
+import { client } from "@/lib/hono";
 
 interface WordBook {
   id: number;
@@ -63,11 +65,11 @@ export default function WordBookContent({
     }
 
     try {
-      const response = await fetch(`/api/word/${wordId}`, {
-        method: "DELETE",
+      const res = await client.word[":id"].$delete({
+        param: { id: wordId.toString() },
       });
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to delete word.");
       }
 
@@ -117,23 +119,25 @@ export default function WordBookContent({
                 <p className="font-semibold">{word.term}</p>
                 <p className="text-gray-600">{word.meaning}</p>
                 <p className="text-sm text-gray-500">
-                  作成日: {new Date(word.createdAt).toLocaleDateString()}
+                  作成日: {format(new Date(word.createdAt), "yyyy-MM-dd")}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleEditClick(word)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDeleteClick(word.id)}
-              >
-                Delete
-              </Button>
+              <div className="flex gap-2 items-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditClick(word)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteClick(word.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
