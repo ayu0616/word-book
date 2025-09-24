@@ -99,7 +99,7 @@ export default function WordBookContent({
       <div className="flex items-center mb-4">
         <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
         <Button variant="outline" size="sm" onClick={handleEditTitleClick}>
-          Edit Title
+          編集
         </Button>
       </div>
       <p className="mb-4">単語帳ID: {wordBook.id}</p>
