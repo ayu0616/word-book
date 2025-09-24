@@ -5,7 +5,7 @@ import { wordBooks } from "@/db/schema";
 import { WordBook } from "@/domain/wordBook/entities";
 
 export class DrizzleWordBookRepository implements WordBookRepository {
-  async createWordBook(wordBook: WordBook): Promise<WordBook> {
+  async create(wordBook: WordBook): Promise<WordBook> {
     const [newWordBook] = await db
       .insert(wordBooks)
       .values({

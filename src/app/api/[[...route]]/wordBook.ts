@@ -37,7 +37,7 @@ export const WordBookController = new Hono()
       }
 
       const { title } = c.req.valid("json");
-      const wordBook = await service.createWordBook({
+      const wordBook = await service.create({
         userId: me.user.id,
         title,
       });
