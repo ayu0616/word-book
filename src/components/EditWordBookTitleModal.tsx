@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { client } from "@/lib/hono";
 
 interface EditWordBookTitleModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ interface EditWordBookTitleModalProps {
 }
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required." }).max(255),
+  title: z.string().min(1, { message: "タイトルは必須です。" }).max(255),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -56,22 +57,20 @@ export function EditWordBookTitleModal({
 
   const onSubmit = async (values: FormData) => {
     try {
-      const response = await fetch(`/api/wordBook/${wordBookId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
+      const res = await client.wordBook[":id"].$put({
+        param: { id: wordBookId.toString() },
+        json: values,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update word book title.");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "単語帳タイトルの更新に失敗しました。");
       }
 
       onSave(values.title);
       onClose();
-    } catch (error) {
-      console.error("Error updating word book title:", error);
+    } catch (error: unknown) {
+      console.error("単語帳タイトル更新エラー:", error);
       // Optionally, display an error message to the user
     }
   };
@@ -80,7 +79,7 @@ export function EditWordBookTitleModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Word Book Title</DialogTitle>
+          <DialogTitle>単語帳タイトルを編集</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -89,7 +88,7 @@ export function EditWordBookTitleModal({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>タイトル</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -98,7 +97,7 @@ export function EditWordBookTitleModal({
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit">変更を保存</Button>
             </DialogFooter>
           </form>
         </Form>
