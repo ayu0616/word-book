@@ -165,6 +165,12 @@ export default function WordBookContent({
         >
           新しい単語を追加
         </Link>
+        <Link
+          href={`/words/import?wordBookId=${wordBook.id}`}
+          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+        >
+          CSVで単語をインポート
+        </Link>
       </div>
 
       {editingWord && (
