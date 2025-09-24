@@ -43,6 +43,7 @@ export default function NewWordBookContent() {
       }
 
       router.push(`/wordBooks/${data.wordBook.id}`);
+      router.refresh();
     } catch (error: unknown) {
       console.error("単語帳の作成エラー:", error);
       if (error instanceof Error) {
