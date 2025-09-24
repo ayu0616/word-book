@@ -74,4 +74,8 @@ export class DrizzleWordRepository implements WordRepository {
       })
       .where(eq(words.id, word.id));
   }
+
+  async delete(id: number): Promise<void> {
+    await db.delete(words).where(eq(words.id, id));
+  }
 }

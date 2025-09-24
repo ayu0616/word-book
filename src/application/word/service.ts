@@ -44,4 +44,8 @@ export class WordService {
     await this.repo.update(updatedWord);
     return updatedWord;
   }
+
+  async deleteWord(id: number): Promise<void> {
+    await this.repo.delete(id);
+  }
 }

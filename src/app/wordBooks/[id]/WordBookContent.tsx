@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
+import { client } from "@/lib/hono";
 
 interface WordBook {
   id: number;
@@ -54,6 +55,28 @@ export default function WordBookContent({
     setEditingWord(null);
   };
 
+  const handleDeleteClick = useCallback(async (wordId: number) => {
+    if (!confirm("Are you sure you want to delete this word?")) {
+      return;
+    }
+
+    try {
+      const res = await client.word[":id"].$delete({
+        param: { id: wordId.toString() },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete word.");
+      }
+
+      // Update the UI by removing the deleted word
+      setWords((prevWords) => prevWords.filter((word) => word.id !== wordId));
+    } catch (error) {
+      console.error("Error deleting word:", error);
+      // Optionally, display an error message to the user
+    }
+  }, []);
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{wordBook.title}</h1>
@@ -73,13 +96,22 @@ export default function WordBookContent({
                 <p className="font-semibold">{word.term}</p>
                 <p className="text-gray-600">{word.meaning}</p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleEditClick(word)}
-              >
-                Edit
-              </Button>
+              <div className="flex gap-2 items-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditClick(word)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteClick(word.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
