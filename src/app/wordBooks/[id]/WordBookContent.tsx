@@ -95,20 +95,22 @@ export default function WordBookContent({
                 <p className="font-semibold">{word.term}</p>
                 <p className="text-gray-600">{word.meaning}</p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleEditClick(word)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDeleteClick(word.id)}
-              >
-                Delete
-              </Button>
+              <div className="flex gap-2 items-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEditClick(word)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteClick(word.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
