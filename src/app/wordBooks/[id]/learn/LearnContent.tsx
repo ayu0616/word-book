@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { words } from "@/db/schema";
+import { client } from "@/lib/hono";
 
 type LearnContentProps = {
   initialWords: (typeof words.$inferSelect)[];
@@ -45,14 +46,10 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     if (!currentWordData) return;
 
     try {
-      const response = await fetch("/api/learning/record", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ wordId: currentWordData.id, result }),
+      const res = await client.learning.api.learning.record.$post({
+        json: { wordId: currentWordData.id, result },
       });
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to record learning result.");
       }
       // After recording, move to the next word in the local list
