@@ -72,31 +72,37 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>{currentWordData.term}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {showMeaning && <p className="mb-4">{currentWordData.meaning}</p>}
-        <div className="flex justify-between">
+    <div className="container mx-auto flex justify-center items-center flex-1 p-4">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>{currentWordData.term}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {showMeaning && <p className="mb-4">{currentWordData.meaning}</p>}
           {!showMeaning && (
-            <Button onClick={handleShowAnswer}>Show Answer</Button>
-          )}
-          {showMeaning && (
-            <>
-              <Button
-                onClick={() => handleRecordResult("incorrect")}
-                variant="destructive"
-              >
-                Incorrect
+            <div>
+              <Button className="w-full" onClick={handleShowAnswer}>
+                答えを見る
               </Button>
-              <Button onClick={() => handleRecordResult("correct")}>
-                Correct
-              </Button>
-            </>
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex justify-center gap-4">
+            {showMeaning && (
+              <>
+                <Button
+                  onClick={() => handleRecordResult("incorrect")}
+                  variant="destructive"
+                >
+                  不正解だった
+                </Button>
+                <Button onClick={() => handleRecordResult("correct")}>
+                  正解した
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
