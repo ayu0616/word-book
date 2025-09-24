@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { client } from "@/lib/hono";
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required." }).max(255),
+  title: z.string().min(1, { message: "タイトルは必須です。" }).max(255),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -36,12 +36,12 @@ export default function NewWordBookContent() {
       const res = await client.wordBook.create.$post({ json: values });
       const data = await res.json();
       if (!data.ok) {
-        throw new Error(data.error ?? "Failed to create word book.");
+        throw new Error(data.error ?? "単語帳の作成に失敗しました。");
       }
 
       router.push(`/wordBooks/${data.wordBook.id}`);
     } catch (error) {
-      console.error("Error creating word book:", error);
+      console.error("単語帳の作成エラー:", error);
       // Optionally, display an error message to the user
     }
   };
