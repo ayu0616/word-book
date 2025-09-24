@@ -35,8 +35,8 @@ interface EditWordModalProps {
 }
 
 const formSchema = z.object({
-  term: z.string().min(1, { message: "Term is required." }).max(255),
-  meaning: z.string().min(1, { message: "Meaning is required." }),
+  term: z.string().min(1, { message: "単語は必須です。" }).max(255),
+  meaning: z.string().min(1, { message: "意味は必須です。" }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -82,7 +82,7 @@ export function EditWordModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Word</DialogTitle>
+          <DialogTitle>単語を編集</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -91,7 +91,7 @@ export function EditWordModal({
               name="term"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Term</FormLabel>
+                  <FormLabel>単語</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -104,7 +104,7 @@ export function EditWordModal({
               name="meaning"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meaning</FormLabel>
+                  <FormLabel>意味</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
                   </FormControl>
@@ -114,7 +114,7 @@ export function EditWordModal({
             />
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
-                Save changes
+                変更を保存
               </Button>
             </DialogFooter>
           </form>
