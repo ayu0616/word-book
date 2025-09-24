@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { client } from "@/lib/hono";
 
 interface WordBook {
   id: number;
@@ -25,19 +26,20 @@ export default function HomeContent({
     }
 
     try {
-      const response = await fetch(`/api/wordBook/${wordBookId}`, {
-        method: "DELETE",
+      const res = await client.wordBook[":id"].$delete({
+        param: { id: wordBookId.toString() },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete word book.");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to delete word book.");
       }
 
       // Update the UI by removing the deleted word book
       setWordBooks((prevWordBooks) =>
         prevWordBooks.filter((wordBook) => wordBook.id !== wordBookId),
       );
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error deleting word book:", error);
       // Optionally, display an error message to the user
     }
@@ -76,7 +78,7 @@ export default function HomeContent({
                 onClick={() => handleDeleteClick(wordBook.id)}
                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
               >
-                Delete
+                削除
               </button>
             </li>
           ))}
