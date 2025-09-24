@@ -7,6 +7,20 @@ describe("WordService", () => {
   it("should create a word", async () => {
     const mockWordRepository: WordRepository = {
       createWord: vi.fn(async (word: Word) => word),
+      findById: vi.fn(async (id: number) => {
+        if (id === 1) {
+          return Word.fromPersistence({
+            id: 1,
+            wordBookId: 1,
+            term: "Word 1",
+            meaning: "Meaning 1",
+            createdAt: new Date(),
+            consecutiveCorrectCount: 0,
+            nextReviewDate: new Date(),
+          });
+        }
+        return undefined;
+      }),
       findWordsByWordBookId: vi.fn(async (wordBookId: number) => [
         Word.fromPersistence({
           id: 1,
@@ -14,6 +28,8 @@ describe("WordService", () => {
           term: "Word 1",
           meaning: "Meaning 1",
           createdAt: new Date(),
+          consecutiveCorrectCount: 0,
+          nextReviewDate: new Date(),
         }),
         Word.fromPersistence({
           id: 2,
@@ -21,6 +37,8 @@ describe("WordService", () => {
           term: "Word 2",
           meaning: "Meaning 2",
           createdAt: new Date(),
+          consecutiveCorrectCount: 0,
+          nextReviewDate: new Date(),
         }),
       ]),
     };

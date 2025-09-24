@@ -1,21 +1,15 @@
+import type { WordRepository } from "@/application/word/ports";
 import type { words } from "@/db/schema";
-import { LearningRecord } from "@/domain/learningRecord/entities";
 import type { LearningRecordRepository } from "./ports";
 
 export class LearningRecordService {
   constructor(
     private readonly learningRecordRepository: LearningRecordRepository,
+    private readonly wordRepository: WordRepository,
   ) {}
 
-  async createLearningRecord(params: {
-    wordId: number;
-    result: "correct" | "incorrect";
-  }): Promise<LearningRecord> {
-    return this.learningRecordRepository.create(params);
-  }
-
   private calculateNextReviewDate(consecutiveCorrectCount: number): Date {
-    const days = 2 ** consecutiveCorrectCount;
+    const days = Math.floor(2 ** (consecutiveCorrectCount - 1));
     const date = new Date();
     date.setDate(date.getDate() + days);
     return date;
@@ -24,21 +18,15 @@ export class LearningRecordService {
   async recordLearningResult(params: {
     wordId: number;
     result: "correct" | "incorrect";
-  }): Promise<LearningRecord> {
-    let learningRecord = (
-      await this.learningRecordRepository.findByWordId(params.wordId)
-    )[0];
+  }): Promise<void> {
+    const word = await this.wordRepository.findById(params.wordId);
 
-    if (!learningRecord) {
-      // If no learning record exists, create a new one
-      learningRecord = await this.learningRecordRepository.create({
-        wordId: params.wordId,
-        result: params.result,
-      });
+    if (!word) {
+      throw new Error("Word not found");
     }
 
-    let newConsecutiveCorrectCount = learningRecord.consecutiveCorrectCount;
-    let newNextReviewDate = learningRecord.nextReviewDate;
+    let newConsecutiveCorrectCount = word.consecutiveCorrectCount;
+    let newNextReviewDate = word.nextReviewDate;
 
     if (params.result === "correct") {
       newConsecutiveCorrectCount++;
@@ -52,22 +40,16 @@ export class LearningRecordService {
       ); // 1 day from now
     }
 
-    const updatedRecord = new LearningRecord({
-      ...learningRecord,
-      consecutiveCorrectCount: newConsecutiveCorrectCount,
-      nextReviewDate: newNextReviewDate,
-      updatedAt: new Date(),
-    });
-
-    return this.learningRecordRepository.update(updatedRecord);
+    await this.learningRecordRepository.updateWordLearningData(
+      params.wordId,
+      newConsecutiveCorrectCount,
+      newNextReviewDate,
+    );
   }
 
   async getWordsToLearn(
     wordBookId: number,
-    limit: number,
-  ): Promise<
-    { learningRecord: LearningRecord; word: typeof words.$inferSelect }[]
-  > {
-    return this.learningRecordRepository.findWordsToLearn(wordBookId, limit);
+  ): Promise<(typeof words.$inferSelect)[]> {
+    return this.learningRecordRepository.findWordsToLearn(wordBookId);
   }
 }

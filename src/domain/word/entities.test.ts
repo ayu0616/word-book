@@ -25,6 +25,8 @@ describe("Word", () => {
       term: "persisted term",
       meaning: "persisted meaning",
       createdAt: now,
+      consecutiveCorrectCount: 0,
+      nextReviewDate: now,
     });
 
     expect(word).toBeInstanceOf(Word);

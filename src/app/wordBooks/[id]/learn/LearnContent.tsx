@@ -1,43 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { LearningRecord } from "@/domain/learningRecord/entities";
-import type { Word } from "@/domain/word/entities";
+import type { words } from "@/db/schema";
+import { client } from "@/lib/hono";
 
 type LearnContentProps = {
-  initialWords: { learningRecord: LearningRecord; word: Word }[];
+  initialWords: (typeof words.$inferSelect)[];
 };
 
 export function LearnContent({ initialWords }: LearnContentProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [currentWordData, setCurrentWordData] = useState<{
-    learningRecord: LearningRecord;
-    word: Word;
-  } | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
-  const [loading, setLoading] = useState(true); // Still need loading for initial state
   const [error, setError] = useState<string | null>(null);
+  const [isSendIncorrect, setIsSendIncorrect] = useState(false);
 
-  useEffect(() => {
-    if (initialWords.length > 0) {
-      setCurrentWordData(initialWords[currentWordIndex]);
-      setLoading(false);
-    } else {
-      setLoading(false);
-      setCurrentWordData(null); // No words to learn
-    }
-  }, [initialWords, currentWordIndex]);
+  const currentWordData =
+    initialWords.length > 0 && currentWordIndex < initialWords.length
+      ? initialWords[currentWordIndex]
+      : null;
 
   const moveToNextWord = useCallback(() => {
     setShowMeaning(false);
-    if (currentWordIndex < initialWords.length - 1) {
-      setCurrentWordIndex((prevIndex) => prevIndex + 1);
-    } else {
-      setCurrentWordData(null); // All words learned
-    }
-  }, [currentWordIndex, initialWords]);
+    setCurrentWordIndex((prevIndex) => prevIndex + 1);
+  }, []);
 
   const handleShowAnswer = () => {
     setShowMeaning(true);
@@ -46,15 +33,15 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   const handleRecordResult = async (result: "correct" | "incorrect") => {
     if (!currentWordData) return;
 
+    if (result === "incorrect") {
+      setIsSendIncorrect(true);
+    }
+
     try {
-      const response = await fetch("/api/learning/record", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ wordId: currentWordData.word.id, result }),
+      const res = await client.learning.record.$post({
+        json: { wordId: currentWordData.id, result },
       });
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to record learning result.");
       }
       // After recording, move to the next word in the local list
@@ -64,8 +51,12 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
+  if (initialWords.length === 0) {
+    return (
+      <div className="container mx-auto flex justify-center items-center flex-1 p-4">
+        <p>本日の学習は完了しました。</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -73,35 +64,56 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   if (!currentWordData) {
-    return <p>No more words to learn in this word book.</p>;
+    if (isSendIncorrect) {
+      return (
+        <div className="container mx-auto flex flex-col gap-4 justify-center items-center flex-1 p-4">
+          <p>リロードして間違えた単語を復習してください。</p>
+          <div>
+            <Button onClick={() => window.location.reload()}>リロード</Button>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="container mx-auto flex justify-center items-center flex-1 p-4">
+          <p>本日の学習は完了しました。</p>
+        </div>
+      );
+    }
   }
 
   return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>{currentWordData.word.term}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {showMeaning && <p className="mb-4">{currentWordData.word.meaning}</p>}
-        <div className="flex justify-between">
+    <div className="container mx-auto flex justify-center items-center flex-1 p-4">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>{currentWordData.term}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {showMeaning && <p className="mb-4">{currentWordData.meaning}</p>}
           {!showMeaning && (
-            <Button onClick={handleShowAnswer}>Show Answer</Button>
-          )}
-          {showMeaning && (
-            <>
-              <Button
-                onClick={() => handleRecordResult("incorrect")}
-                variant="destructive"
-              >
-                Incorrect
+            <div>
+              <Button className="w-full" onClick={handleShowAnswer}>
+                答えを見る
               </Button>
-              <Button onClick={() => handleRecordResult("correct")}>
-                Correct
-              </Button>
-            </>
+            </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex justify-center gap-4">
+            {showMeaning && (
+              <>
+                <Button
+                  onClick={() => handleRecordResult("incorrect")}
+                  variant="destructive"
+                >
+                  不正解だった
+                </Button>
+                <Button onClick={() => handleRecordResult("correct")}>
+                  正解した
+                </Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
