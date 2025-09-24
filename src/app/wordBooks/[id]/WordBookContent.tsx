@@ -20,6 +20,7 @@ interface Word {
   term: string;
   meaning: string;
   createdAt: string;
+  nextReviewDate: string;
 }
 
 export default function WordBookContent({
@@ -120,6 +121,10 @@ export default function WordBookContent({
                 <p className="text-gray-600">{word.meaning}</p>
                 <p className="text-sm text-gray-500">
                   作成日: {format(new Date(word.createdAt), "yyyy-MM-dd")}
+                </p>
+                <p className="text-sm text-gray-500">
+                  次回の復習日:{" "}
+                  {format(new Date(word.nextReviewDate), "yyyy-MM-dd")}
                 </p>
               </div>
               <div className="flex gap-2 items-center">
