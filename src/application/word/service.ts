@@ -48,4 +48,25 @@ export class WordService {
   async deleteWord(id: number): Promise<void> {
     await this.repo.delete(id);
   }
+
+  async importWordsFromCsv(
+    wordBookId: number,
+    csvContent: string,
+  ): Promise<Word[]> {
+    const lines = csvContent.split("\n").filter((line) => line.trim() !== "");
+    const importedWords: Word[] = [];
+
+    for (const line of lines) {
+      const [term, meaning] = line.split(",").map((s) => s.trim());
+
+      if (term && meaning) {
+        const word = Word.create({ wordBookId, term, meaning });
+        await this.repo.createWord(word);
+        importedWords.push(word);
+      } else {
+        console.warn(`Skipping malformed CSV line: ${line}`);
+      }
+    }
+    return importedWords;
+  }
 }

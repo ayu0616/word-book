@@ -204,4 +204,72 @@ describe("WordService", () => {
 
     expect(mockWordRepository.delete).toHaveBeenCalledWith(wordId);
   });
+
+  describe("importWordsFromCsv", () => {
+    it("should import words from CSV content", async () => {
+      const mockWordRepository: WordRepository = {
+        createWord: vi.fn(async (word: Word) => word),
+        findById: vi.fn(),
+        findWordsByWordBookId: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      };
+      const service = new WordService(mockWordRepository);
+
+      const wordBookId = 1;
+      const csvContent = "term1,meaning1\nterm2,meaning2";
+
+      const importedWords = await service.importWordsFromCsv(
+        wordBookId,
+        csvContent,
+      );
+
+      expect(mockWordRepository.createWord).toHaveBeenCalledTimes(2);
+      expect(mockWordRepository.createWord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          wordBookId,
+          term: "term1",
+          meaning: "meaning1",
+        }),
+      );
+      expect(mockWordRepository.createWord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          wordBookId,
+          term: "term2",
+          meaning: "meaning2",
+        }),
+      );
+      expect(importedWords).toHaveLength(2);
+      expect(importedWords[0]).toBeInstanceOf(Word);
+    });
+
+    it("should skip malformed CSV lines", async () => {
+      const mockWordRepository: WordRepository = {
+        createWord: vi.fn(async (word: Word) => word),
+        findById: vi.fn(),
+        findWordsByWordBookId: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      };
+      const service = new WordService(mockWordRepository);
+
+      const wordBookId = 1;
+      const csvContent = "term1,meaning1\nmalformed_line\nterm2,meaning2,extra"; // 2つ目が不正、3つ目が余分な要素
+
+      const importedWords = await service.importWordsFromCsv(
+        wordBookId,
+        csvContent,
+      );
+
+      expect(mockWordRepository.createWord).toHaveBeenCalledTimes(1); // term1,meaning1 のみ
+      expect(mockWordRepository.createWord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          wordBookId,
+          term: "term1",
+          meaning: "meaning1",
+        }),
+      );
+      expect(importedWords).toHaveLength(1);
+    });
+  });
 });
