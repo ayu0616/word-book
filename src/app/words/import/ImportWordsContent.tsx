@@ -43,7 +43,7 @@ export default function ImportWordsContent({
     try {
       const res = await client.word.import.$post({
         json: {
-          wordBookId: wordBook.id,
+          wordBookId: wordBook.id.toString(),
           csvContent: values.csvContent,
         },
       });

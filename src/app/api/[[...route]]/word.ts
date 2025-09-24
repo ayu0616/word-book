@@ -160,50 +160,49 @@ export const WordController = new Hono()
       return c.json({ ok: true, message: "Word deleted successfully" }, 200);
     },
   )
-  .post("/import", async (c) => {
-    const sid = getCookie(c, SESSION_COOKIE);
-    if (!sid) {
-      return c.json({ ok: false, error: "unauthorized" }, 401);
-    }
+  .post(
+    "/import",
+    zValidator(
+      "json",
+      z.object({
+        wordBookId: z.string().transform(Number),
+        csvContent: z.string(),
+      }),
+    ),
+    async (c) => {
+      const sid = getCookie(c, SESSION_COOKIE);
+      if (!sid) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
 
-    const me = await authService.me(sid);
-    if (!me.ok || !me.user) {
-      return c.json({ ok: false, error: "unauthorized" }, 401);
-    }
+      const me = await authService.me(sid);
+      if (!me.ok || !me.user) {
+        return c.json({ ok: false, error: "unauthorized" }, 401);
+      }
 
-    const body = await c.req.parseBody();
-    const schema = z.object({
-      wordBookId: z.string().transform(Number),
-      csvContent: z.string(),
-    });
-    const validationResult = schema.safeParse(body);
+      const { wordBookId, csvContent } = c.req.valid("json");
 
-    if (!validationResult.success) {
-      return c.json({ ok: false, error: validationResult.error.message }, 400);
-    }
+      const wordBook = await wordBookService.findWordBookById(wordBookId);
+      if (!wordBook || wordBook.userId !== me.user.id) {
+        return c.json({ ok: false, error: "word_book_not_found" }, 400);
+      }
 
-    const { wordBookId, csvContent } = validationResult.data;
-
-    const wordBook = await wordBookService.findWordBookById(wordBookId);
-    if (!wordBook || wordBook.userId !== me.user.id) {
-      return c.json({ ok: false, error: "word_book_not_found" }, 400);
-    }
-
-    try {
-      const importedWords = await wordService.importWordsFromCsv(
-        wordBookId,
-        csvContent,
-      );
-      return c.json({ ok: true, importedWords }, 201);
-    } catch (e: unknown) {
-      return c.json(
-        {
-          ok: false,
-          error:
-            (e instanceof Error ? e.message : "不明なエラー") ||
-            "CSVインポートエラー",
-        },
-        400,
-      );
-    }
-  });
+      try {
+        const importedWords = await wordService.importWordsFromCsv(
+          wordBookId,
+          csvContent,
+        );
+        return c.json({ ok: true, importedWords }, 201);
+      } catch (e: unknown) {
+        return c.json(
+          {
+            ok: false,
+            error:
+              (e instanceof Error ? e.message : "不明なエラー") ||
+              "CSVインポートエラー",
+          },
+          400,
+        );
+      }
+    },
+  );
