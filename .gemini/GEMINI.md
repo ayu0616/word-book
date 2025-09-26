@@ -1,5 +1,12 @@
 @../memo.md に実装メモを記載している。
-@../.serena にも関連情報がある。
+
+- 関連情報
+  - @../.serena/memories/code_style_conventions.md
+  - @../.serena/memories/codebase_structure.md
+  - @../.serena/memories/project_purpose.md
+  - @../.serena/memories/suggested_commands.md
+  - @../.serena/memories/task_completion_guidelines.md
+  - @../.serena/memories/tech_stack.md
 
 ## ページの設計方針
 
