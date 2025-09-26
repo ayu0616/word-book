@@ -71,7 +71,7 @@ describe("DrizzleAuthRepository", () => {
   describe("findUserByEmail", () => {
     it("should return a User if found", async () => {
       const mockEmail = EmailAddress.create("test@example.com");
-      const mockPasswordHash = PasswordHash.create("hashedpassword");
+      const mockPasswordHash = PasswordHash.fromHashed("hashedpassword");
       const mockUserRow = {
         id: 1,
         email: mockEmail.toString(),
@@ -107,7 +107,7 @@ describe("DrizzleAuthRepository", () => {
   describe("createUser", () => {
     it("should create and return a new User", async () => {
       const mockEmail = EmailAddress.create("new@example.com");
-      const mockPasswordHash = PasswordHash.create("newhashedpassword");
+      const mockPasswordHash = PasswordHash.fromHashed("newhashedpassword");
       const mockNewUserRow = {
         id: 2,
         email: mockEmail.toString(),
@@ -144,7 +144,7 @@ describe("DrizzleAuthRepository", () => {
   describe("findUserById", () => {
     it("should return a User if found by ID", async () => {
       const mockEmail = EmailAddress.create("idtest@example.com");
-      const mockPasswordHash = PasswordHash.create("hashedpassword");
+      const mockPasswordHash = PasswordHash.fromHashed("hashedpassword");
       const mockUserRow = {
         id: 3,
         email: mockEmail.toString(),
