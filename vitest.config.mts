@@ -15,7 +15,8 @@ export default defineConfig({
       include: [
         "src/domain/**/*.ts",
         "src/application/**/*.ts",
-        "src/infrastructure/auth/passwordHasher.bcrypt.ts",
+        "src/infrastructure/**/*.ts",
+        "src/lib/**/*.ts",
       ],
       exclude: [
         "**/*.test.ts",
