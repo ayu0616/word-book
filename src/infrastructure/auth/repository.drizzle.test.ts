@@ -112,9 +112,9 @@ describe("DrizzleAuthRepository", () => {
   });
 
   describe("createUser", () => {
-      expect(user?.email).toEqual(mockEmail);
-      expect(user?.name).toBe(mockUserRow.name);
-      expect(user?.passwordHash).toEqual(mockPasswordHash);
+    it("should create and return a new User", async () => {
+      const mockEmail = EmailAddress.create("new@example.com");
+      const mockPasswordHash = PasswordHash.fromHashed("newhashedpassword");
       const mockNewUserRow = {
         id: 2,
         email: mockEmail.toString(),
