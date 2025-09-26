@@ -24,6 +24,7 @@ export default defineConfig({
         "src/app/**",
         "src/db/**",
         "src/lib/hono.ts",
+        "src/lib/hono-server.ts",
         "next.config.ts",
         "drizzle.config.ts",
         "postcss.config.mjs",
