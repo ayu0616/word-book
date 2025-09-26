@@ -14,6 +14,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { client } from "@/lib/hono";
 
@@ -70,6 +72,19 @@ export default function ImportWordsContent({
       </h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <Label className="flex flex-col gap-2 items-start">
+            <p>CSVファイル</p>
+            <Input
+              type="file"
+              accept=".csv"
+              onChange={async (e) =>
+                form.setValue(
+                  "csvContent",
+                  (await e.target.files?.[0].text()) ?? "",
+                )
+              }
+            />
+          </Label>
           <FormField
             control={form.control}
             name="csvContent"
