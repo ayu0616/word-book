@@ -41,24 +41,31 @@ vi.mock("drizzle-orm", async (importOriginal) => {
 });
 
 // Mock value objects
-vi.mock("@/domain/auth/valueObjects", () => ({
-  EmailAddress: {
-    create: vi.fn((value) => ({
-      toString: () => value,
-      equals: vi.fn((other) => other.toString() === value),
-    })) as Mock,
-  },
-  PasswordHash: {
-    create: vi.fn((value) => ({
-      toString: () => value,
-      equals: vi.fn((other) => other.toString() === value),
-    })) as Mock,
-    fromHashed: vi.fn((value) => ({
-      toString: () => value,
-      equals: vi.fn((other) => other.toString() === value),
-    })) as Mock,
-  },
-}));
+vi.mock("@/domain/auth/valueObjects", () => {
+  class MockEmailAddress {
+    constructor(public value: string) {}
+    toString = () => this.value;
+    equals = vi.fn(
+      (other: MockEmailAddress) => other.toString() === this.value,
+    );
+    static create = vi.fn((value: string) => new MockEmailAddress(value));
+  }
+
+  class MockPasswordHash {
+    constructor(public value: string) {}
+    toString = () => this.value;
+    equals = vi.fn(
+      (other: MockPasswordHash) => other.toString() === this.value,
+    );
+    static create = vi.fn((value: string) => new MockPasswordHash(value));
+    static fromHashed = vi.fn((value: string) => new MockPasswordHash(value));
+  }
+
+  return {
+    EmailAddress: MockEmailAddress,
+    PasswordHash: MockPasswordHash,
+  };
+});
 
 describe("DrizzleAuthRepository", () => {
   let repository: DrizzleAuthRepository;
