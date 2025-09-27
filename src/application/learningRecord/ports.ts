@@ -7,4 +7,5 @@ export interface LearningRecordRepository {
     consecutiveCorrectCount: number,
     nextReviewDate: Date,
   ): Promise<void>;
+  countWordsToLearn(wordBookId: number): Promise<number>;
 }

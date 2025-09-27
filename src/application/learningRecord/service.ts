@@ -52,4 +52,8 @@ export class LearningRecordService {
   ): Promise<(typeof words.$inferSelect)[]> {
     return this.learningRecordRepository.findWordsToLearn(wordBookId);
   }
+
+  async countWordsToLearn(wordBookId: number): Promise<number> {
+    return this.learningRecordRepository.countWordsToLearn(wordBookId);
+  }
 }

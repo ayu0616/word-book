@@ -28,7 +28,24 @@ export default async function WordBookPage({
     }
     const { words } = await wordRes.json();
 
-    return <WordBookContent wordBook={wordBook} words={words} />;
+    // 今日の学習対象の残り単語数を取得
+    const learningCountRes = await client.learning["word-book"][
+      ":wordBookId"
+    ].count.$get({
+      param: { wordBookId: id },
+    });
+    if (!learningCountRes.ok) {
+      throw new Error("学習対象の単語数の取得に失敗しました");
+    }
+    const { count: wordsToLearnCount } = await learningCountRes.json();
+
+    return (
+      <WordBookContent
+        wordBook={wordBook}
+        words={words}
+        wordsToLearnCount={wordsToLearnCount}
+      />
+    );
   } catch (err) {
     if (err instanceof Error) {
       throw err;

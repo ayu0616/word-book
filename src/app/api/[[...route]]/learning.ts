@@ -29,6 +29,21 @@ export const LearningController = new Hono()
       return c.json(wordsToLearn);
     },
   )
+  .get(
+    "/word-book/:wordBookId/count",
+    zValidator(
+      "param",
+      z.object({
+        wordBookId: z.string().transform(Number),
+      }),
+    ),
+    async (c) => {
+      const { wordBookId } = c.req.valid("param");
+      const wordsToLearnCount =
+        await learningRecordService.countWordsToLearn(wordBookId);
+      return c.json({ count: wordsToLearnCount });
+    },
+  )
   .post(
     "/record",
     zValidator(

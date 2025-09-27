@@ -99,6 +99,22 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
     }
   }
 
+  async countWordsToLearn(wordBookId: number): Promise<number> {
+    const now = new Date();
+    const filteredWords = this.words.filter((word) => {
+      const isDueForReview = word.nextReviewDate <= now;
+      const isMastered = word.consecutiveCorrectCount >= 5;
+      const belongsToWordBook = word.wordBookId === wordBookId;
+
+      return (
+        belongsToWordBook &&
+        (isDueForReview || word.consecutiveCorrectCount === 0) &&
+        !isMastered
+      );
+    });
+    return filteredWords.length;
+  }
+
   // Helper to add words for testing
   addWord(word: typeof words.$inferSelect) {
     this.words.push(word);
@@ -251,6 +267,90 @@ describe("LearningRecordService", () => {
 
       expect(wordsToLearn).toHaveLength(1);
       expect(wordsToLearn[0].id).toBe(wordId);
+    });
+  });
+
+  describe("countWordsToLearn", () => {
+    it("should return the correct count of words to learn", async () => {
+      const wordBookId = 1;
+      const wordId1 = 101;
+      const wordId2 = 102;
+      const wordId3 = 103;
+
+      const word1 = {
+        id: wordId1,
+        wordBookId: wordBookId,
+        term: "term1",
+        meaning: "meaning1",
+        createdAt: new Date(),
+        consecutiveCorrectCount: 0,
+        nextReviewDate: new Date(new Date().setDate(new Date().getDate() - 1)), // Due for review
+      };
+      const word2 = {
+        id: wordId2,
+        wordBookId: wordBookId,
+        term: "term2",
+        meaning: "meaning2",
+        createdAt: new Date(),
+        consecutiveCorrectCount: 1, // 復習日が先の日付になるのは正解回数1回以上の時のみ
+        nextReviewDate: new Date(new Date().setDate(new Date().getDate() + 1)), // Not due yet
+      };
+      const word3 = {
+        id: wordId3,
+        wordBookId: wordBookId,
+        term: "mastered",
+        meaning: "マスター済み",
+        createdAt: new Date(),
+        consecutiveCorrectCount: 5,
+        nextReviewDate: new Date(new Date().setDate(new Date().getDate() - 1)), // Due for review but mastered
+      };
+
+      learningRecordRepository.addWord(word1);
+      learningRecordRepository.addWord(word2);
+      learningRecordRepository.addWord(word3);
+
+      const count = await service.countWordsToLearn(wordBookId);
+      expect(count).toBe(1); // Only word1 is due for review and not mastered
+    });
+
+    it("should return 0 if no words are due for learning", async () => {
+      const wordBookId = 1;
+      const wordId1 = 101;
+
+      const word1 = {
+        id: wordId1,
+        wordBookId: wordBookId,
+        term: "term1",
+        meaning: "meaning1",
+        createdAt: new Date(),
+        consecutiveCorrectCount: 1,
+        nextReviewDate: new Date(new Date().setDate(new Date().getDate() + 1)), // Not due yet
+      };
+
+      learningRecordRepository.addWord(word1);
+
+      const count = await service.countWordsToLearn(wordBookId);
+      expect(count).toBe(0);
+    });
+
+    it("should return 0 if all words are mastered", async () => {
+      const wordBookId = 1;
+      const wordId1 = 101;
+
+      const word1 = {
+        id: wordId1,
+        wordBookId: wordBookId,
+        term: "mastered",
+        meaning: "マスター済み",
+        createdAt: new Date(),
+        consecutiveCorrectCount: 5,
+        nextReviewDate: new Date(new Date().setDate(new Date().getDate() - 1)), // Due for review but mastered
+      };
+
+      learningRecordRepository.addWord(word1);
+
+      const count = await service.countWordsToLearn(wordBookId);
+      expect(count).toBe(0);
     });
   });
 });

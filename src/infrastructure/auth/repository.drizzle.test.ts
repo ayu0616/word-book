@@ -5,7 +5,6 @@ import { Session, User } from "@/domain/auth/entities";
 import { EmailAddress, PasswordHash } from "@/domain/auth/valueObjects";
 import { DrizzleAuthRepository } from "./repository.drizzle";
 
-// Mock the db object
 vi.mock("@/db", () => ({
   db: {
     query: {
@@ -28,17 +27,13 @@ vi.mock("@/db", () => ({
 }));
 
 // Mock drizzle-orm functions
-vi.mock("drizzle-orm", async (importOriginal) => {
-  const mod = await importOriginal<typeof import("drizzle-orm")>();
-  return {
-    ...mod,
-    eq: vi.fn((column, value) => ({
-      column,
-      value,
-      __isDrizzleEq: true,
-    })) as Mock,
-  };
-});
+vi.mock("drizzle-orm", () => ({
+  eq: vi.fn((column, value) => ({
+    column,
+    value,
+    __isDrizzleEq: true,
+  })) as Mock,
+}));
 
 // Mock value objects
 vi.mock("@/domain/auth/valueObjects", () => {

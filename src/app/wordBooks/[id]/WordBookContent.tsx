@@ -28,9 +28,11 @@ interface Word {
 export default function WordBookContent({
   wordBook: initialWordBook,
   words: initialWords,
+  wordsToLearnCount,
 }: {
   wordBook: WordBook;
   words: Word[];
+  wordsToLearnCount: number;
 }) {
   const [wordBook, setWordBook] = useState(initialWordBook);
   const [words, setWords] = useState(initialWords);
@@ -121,6 +123,7 @@ export default function WordBookContent({
       <ul className="my-6">
         <li>単語帳ID: {wordBook.id}</li>
         <li>単語数: {words.length}</li>
+        <li>今日の学習対象: {wordsToLearnCount}</li>
       </ul>
 
       <h2 className="text-xl font-semibold mb-3">単語リスト</h2>
