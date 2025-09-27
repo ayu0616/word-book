@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { AddWordDialog } from "@/components/AddWordDialog";
 import { EditWordBookTitleModal } from "@/components/EditWordBookTitleModal";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
@@ -159,12 +160,7 @@ export default function WordBookContent({
         >
           学習を開始
         </Link>
-        <Link
-          href={`/words/new?wordBookId=${wordBook.id}`}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          新しい単語を追加
-        </Link>
+        <AddWordDialog wordBookId={wordBook.id} />
         <Link
           href={`/words/import?wordBookId=${wordBook.id}`}
           className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
