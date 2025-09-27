@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { client } from "@/lib/hono";
 
-export const dynamic = "force-static";
+// export const dynamic = "force-static";
 
 export default function LogoutPage() {
   const router = useRouter();
