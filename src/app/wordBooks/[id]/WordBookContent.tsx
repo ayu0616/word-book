@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { AddWordDialog } from "@/components/AddWordDialog";
 import { EditWordBookTitleModal } from "@/components/EditWordBookTitleModal";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
@@ -109,11 +110,7 @@ export default function WordBookContent({
         <Button asChild>
           <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
         </Button>
-        <Button asChild>
-          <Link href={`/words/new?wordBookId=${wordBook.id}`}>
-            新しい単語を追加
-          </Link>
-        </Button>
+        <AddWordDialog wordBookId={wordBook.id} />
         <Button asChild>
           <Link href={`/words/import?wordBookId=${wordBook.id}`}>
             CSVで単語をインポート
