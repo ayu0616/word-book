@@ -66,14 +66,15 @@ export function EditWordModal({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update word.");
+        const data = await res.json();
+        throw new Error(data.error ?? "単語の更新に失敗しました。");
       }
 
       const updatedWord = await res.json();
       onSave(updatedWord.word); // Assuming the API returns { ok: true, word: updatedWord }
       onClose();
-    } catch (error) {
-      console.error("Error updating word:", error);
+    } catch (error: unknown) {
+      console.error("単語の更新エラー:", error);
       // Optionally, display an error message to the user
     }
   };
