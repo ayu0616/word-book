@@ -4,9 +4,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
-    environment: "node",
+    environment: "jsdom",
+    setupFiles: ["./src/setupTests.ts"],
     globals: true,
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
     coverage: {
       enabled: true,
       provider: "v8",
@@ -15,7 +16,8 @@ export default defineConfig({
       include: [
         "src/domain/**/*.ts",
         "src/application/**/*.ts",
-        "src/infrastructure/auth/passwordHasher.bcrypt.ts",
+        "src/infrastructure/**/*.ts",
+        "src/lib/**/*.ts",
       ],
       exclude: [
         "**/*.test.ts",
@@ -23,6 +25,7 @@ export default defineConfig({
         "src/app/**",
         "src/db/**",
         "src/lib/hono.ts",
+        "src/lib/hono-server.ts",
         "next.config.ts",
         "drizzle.config.ts",
         "postcss.config.mjs",

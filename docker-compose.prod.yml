@@ -8,9 +8,9 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgres://postgres:postgres@db:5432/app_db
-      - PORT=3000
+      - PORT=3001
     ports:
-      - "3000:3000"
+      - "3001:3001"
     depends_on:
       - db
     restart: always
