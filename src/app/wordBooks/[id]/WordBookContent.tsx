@@ -105,8 +105,23 @@ export default function WordBookContent({
           編集
         </Button>
       </div>
-      <p className="mb-4">単語帳ID: {wordBook.id}</p>
-      <p className="mb-4">単語数: {words.length}</p>
+
+      <div className="my-6 flex space-x-4">
+        <Button asChild>
+          <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
+        </Button>
+        <AddWordDialog wordBookId={wordBook.id} />
+        <Button asChild>
+          <Link href={`/words/import?wordBookId=${wordBook.id}`}>
+            CSVで単語をインポート
+          </Link>
+        </Button>
+      </div>
+
+      <ul className="my-6">
+        <li>単語帳ID: {wordBook.id}</li>
+        <li>単語数: {words.length}</li>
+      </ul>
 
       <h2 className="text-xl font-semibold mb-3">単語リスト</h2>
       {words.length === 0 ? (
@@ -152,22 +167,6 @@ export default function WordBookContent({
           ))}
         </ul>
       )}
-
-      <div className="mt-6 flex space-x-4">
-        <Link
-          href={`/wordBooks/${wordBook.id}/learn`}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          学習を開始
-        </Link>
-        <AddWordDialog wordBookId={wordBook.id} />
-        <Link
-          href={`/words/import?wordBookId=${wordBook.id}`}
-          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-        >
-          CSVで単語をインポート
-        </Link>
-      </div>
 
       {editingWord && (
         <EditWordModal
