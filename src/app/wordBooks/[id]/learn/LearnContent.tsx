@@ -14,12 +14,9 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSendIncorrect, _setIsSendIncorrect] = useState(false);
-
   const [learningStats, setLearningStats] = useState({
     correctCount: 0,
     incorrectCount: 0,
-    learnedWordsCount: 0,
   });
 
   const currentWordData =
@@ -45,7 +42,6 @@ export function LearnContent({ initialWords }: LearnContentProps) {
         result === "correct" ? prev.correctCount + 1 : prev.correctCount,
       incorrectCount:
         result === "incorrect" ? prev.incorrectCount + 1 : prev.incorrectCount,
-      learnedWordsCount: prev.learnedWordsCount + 1,
     }));
 
     try {
@@ -75,7 +71,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   if (!currentWordData) {
-    if (isSendIncorrect) {
+    if (learningStats.incorrectCount > 0) {
       return (
         <div className="container mx-auto flex flex-col gap-4 justify-center items-center flex-1 p-4">
           <p>リロードして間違えた単語を復習してください。</p>
@@ -98,10 +94,13 @@ export function LearnContent({ initialWords }: LearnContentProps) {
       <Card className="w-full">
         <CardHeader>
           <CardTitle>{currentWordData.term}</CardTitle>
-          <div className="text-sm text-muted-foreground">
-            <p>学習単語数: {learningStats.learnedWordsCount}</p>
-            <p>正解数: {learningStats.correctCount}</p>
-            <p>不正解数: {learningStats.incorrectCount}</p>
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>正解数: {learningStats.correctCount}</span>
+            <span>不正解数: {learningStats.incorrectCount}</span>
+            <span>
+              学習済み単語数:{" "}
+              {learningStats.correctCount + learningStats.incorrectCount}
+            </span>
           </div>
         </CardHeader>
         <CardContent>
