@@ -110,14 +110,14 @@ export default function WordBookContent({
       <div className="flex items-center mb-4">
         <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleEditTitleClick}>
-            編集
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">操作</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleEditTitleClick}>
+                編集
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
               </DropdownMenuItem>
