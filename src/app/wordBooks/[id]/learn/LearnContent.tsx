@@ -16,6 +16,10 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSendIncorrect, setIsSendIncorrect] = useState(false);
 
+  const [correctCount, setCorrectCount] = useState(0);
+  const [incorrectCount, setIncorrectCount] = useState(0);
+  const [learnedWordsCount, setLearnedWordsCount] = useState(0);
+
   const currentWordData =
     initialWords.length > 0 && currentWordIndex < initialWords.length
       ? initialWords[currentWordIndex]
@@ -35,7 +39,11 @@ export function LearnContent({ initialWords }: LearnContentProps) {
 
     if (result === "incorrect") {
       setIsSendIncorrect(true);
+      setIncorrectCount((prev) => prev + 1);
+    } else {
+      setCorrectCount((prev) => prev + 1);
     }
+    setLearnedWordsCount((prev) => prev + 1);
 
     try {
       const res = await client.learning.record.$post({
@@ -87,6 +95,11 @@ export function LearnContent({ initialWords }: LearnContentProps) {
       <Card className="w-full">
         <CardHeader>
           <CardTitle>{currentWordData.term}</CardTitle>
+          <div className="text-sm text-muted-foreground">
+            <p>学習単語数: {learnedWordsCount}</p>
+            <p>正解数: {correctCount}</p>
+            <p>不正解数: {incorrectCount}</p>
+          </div>
         </CardHeader>
         <CardContent>
           {showMeaning && <p className="mb-4">{currentWordData.meaning}</p>}
