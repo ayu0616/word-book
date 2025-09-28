@@ -175,8 +175,10 @@ export default function WordBookContent({
       </div>
 
       <h2 className="text-xl font-semibold mb-3">単語リスト</h2>
-      {filteredWords.length === 0 ? (
+      {words.length === 0 ? (
         <p>この単語帳にはまだ単語がありません。</p>
+      ) : filteredWords.length === 0 ? (
+        <p>検索条件に一致する単語は見つかりませんでした。</p>
       ) : (
         <ul className="space-y-2">
           {filteredWords.map((word) => (
