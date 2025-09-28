@@ -91,7 +91,11 @@ export function LearnContent({ initialWords }: LearnContentProps) {
           <CardTitle>{currentWordData.term}</CardTitle>
         </CardHeader>
         <CardContent>
-          {showMeaning && <p className="mb-4">{currentWordData.meaning}</p>}
+          {showMeaning && (
+            <p className="mb-4 whitespace-pre-wrap">
+              {currentWordData.meaning}
+            </p>
+          )}
           {!showMeaning && (
             <div>
               <Button className="w-full" onClick={handleShowAnswer}>
