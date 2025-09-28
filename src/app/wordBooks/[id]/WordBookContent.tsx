@@ -1,12 +1,25 @@
 "use client";
 
 import { format } from "date-fns";
+import {
+  EllipsisIcon,
+  PencilIcon,
+  PlayIcon,
+  PlusIcon,
+  UploadIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
-import { AddWordDialog } from "@/components/AddWordDialog";
+import { AddWordDialogTrigger } from "@/components/AddWordDialog";
 import { EditWordBookTitleModal } from "@/components/EditWordBookTitleModal";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { client } from "@/lib/hono";
 
 interface WordBook {
@@ -103,21 +116,39 @@ export default function WordBookContent({
     <div className="container mx-auto p-4">
       <div className="flex items-center mb-4">
         <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
-        <Button variant="outline" size="sm" onClick={handleEditTitleClick}>
-          編集
-        </Button>
-      </div>
-
-      <div className="my-6 flex space-x-4">
-        <Button asChild>
-          <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
-        </Button>
-        <AddWordDialog wordBookId={wordBook.id} />
-        <Button asChild>
-          <Link href={`/words/import?wordBookId=${wordBook.id}`}>
-            CSVで単語をインポート
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <EllipsisIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleEditTitleClick}>
+                <PencilIcon className="mr-2 h-4 w-4" />
+                編集
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/wordBooks/${wordBook.id}/learn`}>
+                  <PlayIcon className="mr-2 h-4 w-4" />
+                  学習を開始
+                </Link>
+              </DropdownMenuItem>
+              <AddWordDialogTrigger wordBookId={wordBook.id}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  単語を追加
+                </DropdownMenuItem>
+              </AddWordDialogTrigger>
+              <DropdownMenuItem asChild>
+                <Link href={`/words/import?wordBookId=${wordBook.id}`}>
+                  <UploadIcon className="mr-2 h-4 w-4" />
+                  CSVで単語をインポート
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <ul className="my-6">

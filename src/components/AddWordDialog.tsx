@@ -9,7 +9,9 @@ interface AddWordDialogProps {
   wordBookId: number;
 }
 
-export const AddWordDialog: FC<AddWordDialogProps> = ({ wordBookId }) => {
+export const AddWordDialogTrigger: FC<
+  AddWordDialogProps & { children: React.ReactNode }
+> = ({ wordBookId, children }) => {
   const router = useRouter();
 
   const onSubmit = async (values: AddWordFormData) => {
@@ -31,13 +33,19 @@ export const AddWordDialog: FC<AddWordDialogProps> = ({ wordBookId }) => {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button>単語を追加</Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogTitle>単語を追加</DialogTitle>
         <AddWordForm onSubmit={onSubmit} />
       </DialogContent>
     </Dialog>
+  );
+};
+
+export const AddWordDialog: FC<AddWordDialogProps> = ({ wordBookId }) => {
+  return (
+    <AddWordDialogTrigger wordBookId={wordBookId}>
+      <Button>単語を追加</Button>
+    </AddWordDialogTrigger>
   );
 };
