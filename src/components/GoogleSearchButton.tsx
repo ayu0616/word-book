@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 
 type GoogleSearchButtonProps = {
@@ -6,13 +5,13 @@ type GoogleSearchButtonProps = {
 };
 
 export function GoogleSearchButton({ term }: GoogleSearchButtonProps) {
-  const handleGoogleSearch = useCallback(() => {
-    window.open(
-      `https://www.google.com/search?q=${term}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  }, [term]);
+  const googleSearchUrl = `https://www.google.com/search?q=${term}`;
 
-  return <Button onClick={handleGoogleSearch}>Googleで検索</Button>;
+  return (
+    <Button asChild>
+      <a href={googleSearchUrl} target="_blank" rel="noopener noreferrer">
+        Googleで検索
+      </a>
+    </Button>
+  );
 }

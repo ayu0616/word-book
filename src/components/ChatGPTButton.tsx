@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 
 type ChatGPTButtonProps = {
@@ -6,14 +5,14 @@ type ChatGPTButtonProps = {
 };
 
 export function ChatGPTButton({ term }: ChatGPTButtonProps) {
-  const handleChatGPT = useCallback(() => {
-    const prompt = encodeURIComponent(`「${term}」について教えてください。`);
-    window.open(
-      `https://chat.openai.com/chat?q=${prompt}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  }, [term]);
+  const prompt = encodeURIComponent(`「${term}」について教えてください。`);
+  const chatGPTUrl = `https://chat.openai.com/chat?q=${prompt}`;
 
-  return <Button onClick={handleChatGPT}>ChatGPTに聞く</Button>;
+  return (
+    <Button asChild>
+      <a href={chatGPTUrl} target="_blank" rel="noopener noreferrer">
+        ChatGPTに聞く
+      </a>
+    </Button>
+  );
 }
