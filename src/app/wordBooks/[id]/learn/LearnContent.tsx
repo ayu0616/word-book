@@ -31,6 +31,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
       window.open(
         `https://www.google.com/search?q=${currentWordData.term}`,
         "_blank",
+        "noopener,noreferrer",
       );
     }
   }, [currentWordData]);
@@ -40,7 +41,11 @@ export function LearnContent({ initialWords }: LearnContentProps) {
       const prompt = encodeURIComponent(
         `「${currentWordData.term}」について教えてください。`,
       );
-      window.open(`https://chat.openai.com/chat?q=${prompt}`, "_blank");
+      window.open(
+        `https://chat.openai.com/chat?q=${prompt}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
     }
   }, [currentWordData]);
 
