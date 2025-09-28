@@ -1,6 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
+import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { AddWordDialogTrigger } from "@/components/AddWordDialog";
@@ -112,7 +113,9 @@ export default function WordBookContent({
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">操作</Button>
+              <Button variant="outline" size="icon">
+                <EllipsisIcon />
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={handleEditTitleClick}>
