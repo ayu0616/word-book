@@ -1,10 +1,20 @@
 import { eq, isNull, lt, or } from "drizzle-orm";
-import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+  vitest,
+} from "vitest";
 import { db } from "@/db";
 import { words } from "@/db/schema";
+import { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate"; // 追加
+import { WordId } from "@/domain/word/value-objects/WordId"; // 追加
 import { DrizzleLearningRecordRepository } from "./repository.drizzle";
 
-vi.mock("@/db", () => ({
+vitest.mock("@/db", () => ({
   db: {
     select: vi.fn(() => ({
       from: vi.fn(() => ({
@@ -20,7 +30,7 @@ vi.mock("@/db", () => ({
 }));
 
 // Mock drizzle-orm functions
-vi.mock("drizzle-orm", () => ({
+vitest.mock("drizzle-orm", () => ({
   and: vi.fn((...conditions) => ({ __isDrizzleAnd: true, conditions })),
   eq: vi.fn((column, value) => ({ column, value, __isDrizzleEq: true })),
   isNull: vi.fn((column) => ({ column, __isDrizzleIsNull: true })),
@@ -83,9 +93,9 @@ describe("DrizzleLearningRecordRepository", () => {
       });
 
       await repository.updateWordLearningData(
-        mockWordId,
+        WordId.create(mockWordId),
         mockConsecutiveCorrectCount,
-        mockNextReviewDate,
+        NextReviewDate.create(mockNextReviewDate),
       );
 
       expect(db.update).toHaveBeenCalledWith(words);

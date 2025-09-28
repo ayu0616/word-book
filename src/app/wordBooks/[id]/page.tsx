@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Word } from "@/domain/word/entities";
 import { getServerClient } from "@/lib/hono-server";
 import WordBookContent from "./WordBookContent";
 
@@ -26,7 +27,19 @@ export default async function WordBookPage({
     if (!wordRes.ok) {
       throw new Error("単語の取得に失敗しました");
     }
-    const { words } = await wordRes.json();
+    const { words: rawWords } = await wordRes.json();
+
+    const words = rawWords.map((w) =>
+      Word.fromPersistence({
+        id: w.id,
+        wordBookId: w.wordBookId,
+        term: w.term,
+        meaning: w.meaning,
+        createdAt: new Date(w.createdAt),
+        consecutiveCorrectCount: w.consecutiveCorrectCount,
+        nextReviewDate: new Date(w.nextReviewDate),
+      }),
+    );
 
     // 今日の学習対象の残り単語数を取得
     const learningCountRes = await client.learning["word-book"][

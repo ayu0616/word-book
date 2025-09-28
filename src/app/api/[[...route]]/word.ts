@@ -1,10 +1,15 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
+import { handle } from "hono/vercel";
 import { z } from "zod";
 import { AuthService } from "@/application/auth/service";
 import { WordService } from "@/application/word/service";
 import { WordBookService } from "@/application/wordBook/service";
+import { Meaning } from "@/domain/word/value-objects/Meaning";
+import { Term } from "@/domain/word/value-objects/Term";
+import { WordBookId } from "@/domain/word/value-objects/WordBookId";
+import { WordId } from "@/domain/word/value-objects/WordId";
 import { BcryptPasswordHasher } from "@/infrastructure/auth/passwordHasher.bcrypt";
 import { DrizzleAuthRepository } from "@/infrastructure/auth/repository.drizzle";
 import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
@@ -50,8 +55,26 @@ export const WordController = new Hono()
         return c.json({ ok: false, error: "word_book_not_found" }, 400);
       }
 
-      const word = await wordService.createWord({ wordBookId, term, meaning });
-      return c.json({ ok: true, word }, 201);
+      const createdWord = await wordService.createWord({
+        wordBookId: WordBookId.create(wordBookId),
+        term: Term.create(term),
+        meaning: Meaning.create(meaning),
+      });
+      return c.json(
+        {
+          ok: true,
+          word: {
+            id: createdWord.id?.value,
+            wordBookId: createdWord.wordBookId.value,
+            term: createdWord.term.value,
+            meaning: createdWord.meaning.value,
+            createdAt: createdWord.createdAt.value,
+            consecutiveCorrectCount: createdWord.consecutiveCorrectCount,
+            nextReviewDate: createdWord.nextReviewDate.value,
+          },
+        },
+        201,
+      );
     },
   )
   .get("/list/:wordBookId", async (c) => {
@@ -75,8 +98,24 @@ export const WordController = new Hono()
       return c.json({ ok: false, error: "word_book_not_found" }, 404);
     }
 
-    const words = await wordService.findWordsByWordBookId(wordBookId);
-    return c.json({ ok: true, words }, 200);
+    const words = await wordService.findWordsByWordBookId(
+      WordBookId.create(wordBookId),
+    );
+    return c.json(
+      {
+        ok: true,
+        words: words.map((word) => ({
+          id: word.id.value,
+          wordBookId: word.wordBookId.value,
+          term: word.term.value,
+          meaning: word.meaning.value,
+          createdAt: word.createdAt.value,
+          consecutiveCorrectCount: word.consecutiveCorrectCount,
+          nextReviewDate: word.nextReviewDate.value,
+        })),
+      },
+      200,
+    );
   })
   .put(
     "/:id",
@@ -107,20 +146,38 @@ export const WordController = new Hono()
       const { id } = c.req.valid("param");
       const { term, meaning } = c.req.valid("json");
 
-      const existingWord = await wordService.findById(id);
+      const existingWord = await wordService.findById(WordId.create(id));
       if (!existingWord) {
         return c.json({ ok: false, error: "word_not_found" }, 404);
       }
 
       const wordBook = await wordBookService.findWordBookById(
-        existingWord.wordBookId,
+        existingWord.wordBookId.value,
       );
       if (!wordBook || wordBook.userId !== me.user.id) {
         return c.json({ ok: false, error: "unauthorized" }, 401);
       }
 
-      const updatedWord = await wordService.updateWord({ id, term, meaning });
-      return c.json({ ok: true, word: updatedWord }, 200);
+      const updatedWord = await wordService.updateWord({
+        id: WordId.create(id),
+        term: Term.create(term),
+        meaning: Meaning.create(meaning),
+      });
+      return c.json(
+        {
+          ok: true,
+          word: {
+            id: updatedWord.id?.value,
+            wordBookId: updatedWord.wordBookId.value,
+            term: updatedWord.term.value,
+            meaning: updatedWord.meaning.value,
+            createdAt: updatedWord.createdAt.value,
+            consecutiveCorrectCount: updatedWord.consecutiveCorrectCount,
+            nextReviewDate: updatedWord.nextReviewDate.value,
+          },
+        },
+        200,
+      );
     },
   )
   .delete(
@@ -144,19 +201,19 @@ export const WordController = new Hono()
 
       const { id } = c.req.valid("param");
 
-      const existingWord = await wordService.findById(id);
+      const existingWord = await wordService.findById(WordId.create(id));
       if (!existingWord) {
         return c.json({ ok: false, error: "word_not_found" }, 404);
       }
 
       const wordBook = await wordBookService.findWordBookById(
-        existingWord.wordBookId,
+        existingWord.wordBookId.value,
       );
       if (!wordBook || wordBook.userId !== me.user.id) {
         return c.json({ ok: false, error: "unauthorized" }, 401);
       }
 
-      await wordService.deleteWord(id);
+      await wordService.deleteWord(WordId.create(id));
       return c.json({ ok: true, message: "Word deleted successfully" }, 200);
     },
   )
@@ -189,10 +246,24 @@ export const WordController = new Hono()
 
       try {
         const importedWords = await wordService.importWordsFromCsv(
-          wordBookId,
+          WordBookId.create(wordBookId),
           csvContent,
         );
-        return c.json({ ok: true, importedWords }, 201);
+        return c.json(
+          {
+            ok: true,
+            importedWords: importedWords.map((word) => ({
+              id: word.id?.value,
+              wordBookId: word.wordBookId.value,
+              term: word.term.value,
+              meaning: word.meaning.value,
+              createdAt: word.createdAt.value,
+              consecutiveCorrectCount: word.consecutiveCorrectCount,
+              nextReviewDate: word.nextReviewDate.value,
+            })),
+          },
+          201,
+        );
       } catch (e: unknown) {
         return c.json(
           {
@@ -206,3 +277,6 @@ export const WordController = new Hono()
       }
     },
   );
+
+export const GET = handle(WordController);
+export const POST = handle(WordController);

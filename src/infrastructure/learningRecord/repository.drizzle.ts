@@ -2,6 +2,8 @@ import { and, count, eq, isNull, lt, or } from "drizzle-orm";
 import type { LearningRecordRepository } from "@/application/learningRecord/ports";
 import { db } from "@/db";
 import { words } from "@/db/schema";
+import type { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate";
+import type { WordId } from "@/domain/word/value-objects/WordId";
 
 export class DrizzleLearningRecordRepository
   implements LearningRecordRepository
@@ -26,17 +28,17 @@ export class DrizzleLearningRecordRepository
   }
 
   async updateWordLearningData(
-    wordId: number,
+    wordId: WordId,
     consecutiveCorrectCount: number,
-    nextReviewDate: Date,
+    nextReviewDate: NextReviewDate,
   ): Promise<void> {
     await db
       .update(words)
       .set({
         consecutiveCorrectCount,
-        nextReviewDate,
+        nextReviewDate: nextReviewDate.value,
       })
-      .where(eq(words.id, wordId));
+      .where(eq(words.id, wordId.value));
   }
 
   async countWordsToLearn(wordBookId: number): Promise<number> {

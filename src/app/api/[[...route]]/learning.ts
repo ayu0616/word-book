@@ -1,8 +1,9 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
+import { handle } from "hono/vercel"; // handle をインポート
 import { z } from "zod";
 import { LearningRecordService } from "@/application/learningRecord/service";
+import { WordId } from "@/domain/word/value-objects/WordId"; // WordId をインポート
 import { DrizzleLearningRecordRepository } from "@/infrastructure/learningRecord/repository.drizzle";
 import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
 
@@ -55,10 +56,10 @@ export const LearningController = new Hono()
     ),
     async (c) => {
       const { wordId, result } = c.req.valid("json");
-      await learningRecordService.recordLearningResult({
-        wordId,
-        result,
-      });
+      await learningRecordService.recordLearningResult(
+        WordId.create(wordId), // WordId型に変換
+        result === "correct",
+      );
       return c.json({ message: "Learning record updated" });
     },
   );

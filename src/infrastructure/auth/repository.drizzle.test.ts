@@ -1,11 +1,19 @@
-import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+  vitest,
+} from "vitest";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
 import { Session, User } from "@/domain/auth/entities";
 import { EmailAddress, PasswordHash } from "@/domain/auth/valueObjects";
 import { DrizzleAuthRepository } from "./repository.drizzle";
 
-vi.mock("@/db", () => ({
+vitest.mock("@/db", () => ({
   db: {
     query: {
       users: {
@@ -27,7 +35,7 @@ vi.mock("@/db", () => ({
 }));
 
 // Mock drizzle-orm functions
-vi.mock("drizzle-orm", () => ({
+vitest.mock("drizzle-orm", () => ({
   eq: vi.fn((column, value) => ({
     column,
     value,
@@ -36,7 +44,7 @@ vi.mock("drizzle-orm", () => ({
 }));
 
 // Mock value objects
-vi.mock("@/domain/auth/valueObjects", () => {
+vitest.mock("@/domain/auth/valueObjects", () => {
   class MockEmailAddress {
     constructor(public value: string) {}
     toString = () => this.value;
