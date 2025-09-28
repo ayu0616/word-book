@@ -26,6 +26,24 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     setCurrentWordIndex((prevIndex) => prevIndex + 1);
   }, []);
 
+  const handleGoogleSearch = useCallback(() => {
+    if (currentWordData?.term) {
+      window.open(
+        `https://www.google.com/search?q=${currentWordData.term}`,
+        "_blank",
+      );
+    }
+  }, [currentWordData]);
+
+  const handleChatGPT = useCallback(() => {
+    if (currentWordData?.term) {
+      const prompt = encodeURIComponent(
+        `「${currentWordData.term}」について教えてください。`,
+      );
+      window.open(`https://chat.openai.com/chat?q=${prompt}`, "_blank");
+    }
+  }, [currentWordData]);
+
   const handleShowAnswer = () => {
     setShowMeaning(true);
   };
@@ -109,6 +127,8 @@ export function LearnContent({ initialWords }: LearnContentProps) {
                 <Button onClick={() => handleRecordResult("correct")}>
                   正解した
                 </Button>
+                <Button onClick={handleGoogleSearch}>Googleで検索</Button>
+                <Button onClick={handleChatGPT}>ChatGPTに聞く</Button>
               </>
             )}
           </div>
