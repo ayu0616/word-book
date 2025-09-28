@@ -16,7 +16,10 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSendIncorrect, setIsSendIncorrect] = useState(false);
+  const [learningStats, setLearningStats] = useState({
+    correctCount: 0,
+    incorrectCount: 0,
+  });
 
   const currentWordData =
     initialWords.length > 0 && currentWordIndex < initialWords.length
@@ -34,10 +37,12 @@ export function LearnContent({ initialWords }: LearnContentProps) {
 
   const handleRecordResult = async (result: "correct" | "incorrect") => {
     if (!currentWordData) return;
-
-    if (result === "incorrect") {
-      setIsSendIncorrect(true);
-    }
+    setLearningStats((prev) => {
+      if (result === "correct") {
+        return { ...prev, correctCount: prev.correctCount + 1 };
+      }
+      return { ...prev, incorrectCount: prev.incorrectCount + 1 };
+    });
 
     try {
       const res = await client.learning.record.$post({
@@ -66,7 +71,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   if (!currentWordData) {
-    if (isSendIncorrect) {
+    if (learningStats.incorrectCount > 0) {
       return (
         <div className="container mx-auto flex flex-col gap-4 justify-center items-center flex-1 p-4">
           <p>リロードして間違えた単語を復習してください。</p>
@@ -85,45 +90,73 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   return (
-    <div className="container mx-auto flex justify-center items-center flex-1 p-4">
-      <Card className="w-full">
+    <div className="container mx-auto flex flex-1 p-4 flex-col gap-4">
+      <Card>
         <CardHeader>
-          <CardTitle>{currentWordData.term}</CardTitle>
+          <CardTitle>学習状況</CardTitle>
         </CardHeader>
         <CardContent>
-          {showMeaning && (
-            <p className="mb-4 whitespace-pre-wrap">
-              {currentWordData.meaning}
-            </p>
-          )}
-          {!showMeaning && (
-            <div>
-              <Button className="w-full" onClick={handleShowAnswer}>
-                答えを見る
-              </Button>
-            </div>
-          )}
-          {showMeaning && (
-            <div className="space-y-4">
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={() => handleRecordResult("incorrect")}
-                  variant="destructive"
-                >
-                  不正解だった
-                </Button>
-                <Button onClick={() => handleRecordResult("correct")}>
-                  正解した
-                </Button>
-              </div>
-              <div className="flex justify-center gap-4">
-                <GoogleSearchLink term={currentWordData.term} />
-                <ChatGPTLink term={currentWordData.term} />
-              </div>
-            </div>
-          )}
+          <table className="text-sm text-muted-foreground">
+            <tbody>
+              <tr>
+                <td className="pr-4">正解数</td>
+                <td>{learningStats.correctCount}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">不正解数</td>
+                <td>{learningStats.incorrectCount}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">学習済み単語数</td>
+                <td>
+                  {learningStats.correctCount + learningStats.incorrectCount} /{" "}
+                  {initialWords.length}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </CardContent>
       </Card>
+      <div className="flex flex-1 justify-center items-center">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>{currentWordData.term}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {showMeaning && (
+              <p className="mb-4 whitespace-pre-wrap">
+                {currentWordData.meaning}
+              </p>
+            )}
+            {!showMeaning && (
+              <div>
+                <Button className="w-full" onClick={handleShowAnswer}>
+                  答えを見る
+                </Button>
+              </div>
+            )}
+            {showMeaning && (
+              <div className="space-y-4">
+                <div className="flex justify-center gap-4">
+                  <Button
+                    onClick={() => handleRecordResult("incorrect")}
+                    variant="destructive"
+                  >
+                    不正解だった
+                  </Button>
+                  <Button onClick={() => handleRecordResult("correct")}>
+                    正解した
+                  </Button>
+                </div>
+                <div className="flex justify-center gap-4">
+                  <GoogleSearchLink term={currentWordData.term} />
+                  <ChatGPTLink term={currentWordData.term} />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
