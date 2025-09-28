@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { client } from "@/lib/hono";
 
 interface WordBook {
@@ -52,6 +53,13 @@ export default function WordBookContent({
   const [isWordModalOpen, setIsWordModalOpen] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredWords = words.filter(
+    (word) =>
+      word.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      word.meaning.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   const handleEditClick = (word: Word) => {
     setEditingWord(word);
@@ -157,12 +165,21 @@ export default function WordBookContent({
         <li>今日の学習対象: {wordsToLearnCount}</li>
       </ul>
 
+      <div className="mb-4">
+        <Input
+          type="text"
+          placeholder="単語を検索..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <h2 className="text-xl font-semibold mb-3">単語リスト</h2>
-      {words.length === 0 ? (
+      {filteredWords.length === 0 ? (
         <p>この単語帳にはまだ単語がありません。</p>
       ) : (
         <ul className="space-y-2">
-          {words.map((word) => (
+          {filteredWords.map((word) => (
             <li
               key={word.id}
               className="p-3 border rounded-md shadow-sm flex justify-between items-center"
