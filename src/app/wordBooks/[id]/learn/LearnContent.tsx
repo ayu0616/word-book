@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { SearchButtons } from "@/components/SearchButtons";
+import { ChatGPTButton } from "@/components/ChatGPTButton";
+import { GoogleSearchButton } from "@/components/GoogleSearchButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { words } from "@/db/schema";
@@ -110,7 +111,8 @@ export function LearnContent({ initialWords }: LearnContentProps) {
                 <Button onClick={() => handleRecordResult("correct")}>
                   正解した
                 </Button>
-                <SearchButtons term={currentWordData.term} />
+                <GoogleSearchButton term={currentWordData.term} />
+                <ChatGPTButton term={currentWordData.term} />
               </>
             )}
           </div>
