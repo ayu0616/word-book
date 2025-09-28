@@ -1,7 +1,13 @@
 "use client";
 
 import { format } from "date-fns";
-import { EllipsisIcon } from "lucide-react";
+import {
+  EllipsisIcon,
+  PencilIcon,
+  PlayIcon,
+  PlusIcon,
+  UploadIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { AddWordDialogTrigger } from "@/components/AddWordDialog";
@@ -119,18 +125,24 @@ export default function WordBookContent({
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={handleEditTitleClick}>
+                <PencilIcon className="mr-2 h-4 w-4" />
                 編集
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
+                <Link href={`/wordBooks/${wordBook.id}/learn`}>
+                  <PlayIcon className="mr-2 h-4 w-4" />
+                  学習を開始
+                </Link>
               </DropdownMenuItem>
               <AddWordDialogTrigger wordBookId={wordBook.id}>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   単語を追加
                 </DropdownMenuItem>
               </AddWordDialogTrigger>
               <DropdownMenuItem asChild>
                 <Link href={`/words/import?wordBookId=${wordBook.id}`}>
+                  <UploadIcon className="mr-2 h-4 w-4" />
                   CSVで単語をインポート
                 </Link>
               </DropdownMenuItem>
