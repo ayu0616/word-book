@@ -1,15 +1,19 @@
+FROM alpine/git AS clone
+
+RUN git clone https://github.com/ayu0616/word-book.git /app
+
 FROM oven/bun:1 AS deps
 
 WORKDIR /app
 
-COPY package.json bun.lock* ./
+COPY --from=clone /app/package.json /app/bun.lock* ./
 RUN bun install --frozen-lockfile
 
 FROM oven/bun:1 AS builder
 
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY --from=clone /app .
 
 # Next.js をビルド
 RUN bun run build
