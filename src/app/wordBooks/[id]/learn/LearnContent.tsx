@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { ChatGPTButton } from "@/components/ChatGPTButton";
-import { GoogleSearchButton } from "@/components/GoogleSearchButton";
+import { ChatGPTLink } from "@/components/ChatGPTLink";
+import { GoogleSearchLink } from "@/components/GoogleSearchLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { words } from "@/db/schema";
@@ -113,8 +113,8 @@ export function LearnContent({ initialWords }: LearnContentProps) {
                 </Button>
               </div>
               <div className="flex justify-center gap-4">
-                <GoogleSearchButton term={currentWordData.term} />
-                <ChatGPTButton term={currentWordData.term} />
+                <GoogleSearchLink term={currentWordData.term} />
+                <ChatGPTLink term={currentWordData.term} />
               </div>
             </div>
           )}
