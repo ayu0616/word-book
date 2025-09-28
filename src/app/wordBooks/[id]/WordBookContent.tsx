@@ -109,30 +109,29 @@ export default function WordBookContent({
     <div className="container mx-auto p-4">
       <div className="flex items-center mb-4">
         <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
-        <Button variant="outline" size="sm" onClick={handleEditTitleClick}>
-          編集
-        </Button>
-      </div>
-
-      <div className="my-6">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">操作</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem asChild>
-              <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
-            </DropdownMenuItem>
-            <AddWordDialogTrigger wordBookId={wordBook.id}>
-              <DropdownMenuItem>単語を追加</DropdownMenuItem>
-            </AddWordDialogTrigger>
-            <DropdownMenuItem asChild>
-              <Link href={`/words/import?wordBookId=${wordBook.id}`}>
-                CSVで単語をインポート
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleEditTitleClick}>
+            編集
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">操作</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
+              </DropdownMenuItem>
+              <AddWordDialogTrigger wordBookId={wordBook.id}>
+                <DropdownMenuItem>単語を追加</DropdownMenuItem>
+              </AddWordDialogTrigger>
+              <DropdownMenuItem asChild>
+                <Link href={`/words/import?wordBookId=${wordBook.id}`}>
+                  CSVで単語をインポート
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <ul className="my-6">
