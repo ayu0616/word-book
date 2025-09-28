@@ -90,53 +90,73 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   return (
-    <div className="container mx-auto flex justify-center items-center flex-1 p-4">
-      <Card className="w-full">
+    <div className="container mx-auto flex flex-1 p-4 flex-col gap-4">
+      <Card>
         <CardHeader>
-          <CardTitle>{currentWordData.term}</CardTitle>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>正解数: {learningStats.correctCount}</span>
-            <span>不正解数: {learningStats.incorrectCount}</span>
-            <span>
-              学習済み単語数:{" "}
-              {learningStats.correctCount + learningStats.incorrectCount}
-            </span>
-          </div>
+          <CardTitle>学習状況</CardTitle>
         </CardHeader>
         <CardContent>
-          {showMeaning && (
-            <p className="mb-4 whitespace-pre-wrap">
-              {currentWordData.meaning}
-            </p>
-          )}
-          {!showMeaning && (
-            <div>
-              <Button className="w-full" onClick={handleShowAnswer}>
-                答えを見る
-              </Button>
-            </div>
-          )}
-          {showMeaning && (
-            <div className="space-y-4">
-              <div className="flex justify-center gap-4">
-                <Button
-                  onClick={() => handleRecordResult("incorrect")}
-                  variant="destructive"
-                >
-                  不正解だった
-                </Button>
-                <Button onClick={() => handleRecordResult("correct")}>
-                  正解した
-                </Button>
-              </div>
-              <div className="flex justify-center gap-4">
-                <GoogleSearchLink term={currentWordData.term} />
-                <ChatGPTLink term={currentWordData.term} />
-              </div>
-            </div>
-          )}
+          <table className="text-sm text-muted-foreground">
+            <tbody>
+              <tr>
+                <td className="pr-4">正解数</td>
+                <td>{learningStats.correctCount}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">不正解数</td>
+                <td>{learningStats.incorrectCount}</td>
+              </tr>
+              <tr>
+                <td className="pr-4">学習済み単語数</td>
+                <td>
+                  {learningStats.correctCount + learningStats.incorrectCount} /{" "}
+                  {initialWords.length}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </CardContent>
       </Card>
+      <div className="flex flex-1 justify-center items-center">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>{currentWordData.term}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {showMeaning && (
+              <p className="mb-4 whitespace-pre-wrap">
+                {currentWordData.meaning}
+              </p>
+            )}
+            {!showMeaning && (
+              <div>
+                <Button className="w-full" onClick={handleShowAnswer}>
+                  答えを見る
+                </Button>
+              </div>
+            )}
+            {showMeaning && (
+              <div className="space-y-4">
+                <div className="flex justify-center gap-4">
+                  <Button
+                    onClick={() => handleRecordResult("incorrect")}
+                    variant="destructive"
+                  >
+                    不正解だった
+                  </Button>
+                  <Button onClick={() => handleRecordResult("correct")}>
+                    正解した
+                  </Button>
+                </div>
+                <div className="flex justify-center gap-4">
+                  <GoogleSearchLink term={currentWordData.term} />
+                  <ChatGPTLink term={currentWordData.term} />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
