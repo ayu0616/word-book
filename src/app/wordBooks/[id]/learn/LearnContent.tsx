@@ -26,13 +26,6 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     setCurrentWordIndex((prevIndex) => prevIndex + 1);
   }, []);
 
-  const formattedMeaning = currentWordData?.meaning
-    ? currentWordData.meaning.split("\n").map((line) => ({
-        id: crypto.randomUUID(),
-        text: line,
-      }))
-    : [];
-
   const handleShowAnswer = () => {
     setShowMeaning(true);
   };
@@ -97,11 +90,9 @@ export function LearnContent({ initialWords }: LearnContentProps) {
         </CardHeader>
         <CardContent>
           {showMeaning && (
-            <div className="mb-4">
-              {formattedMeaning.map((item) => (
-                <p key={item.id}>{item.text}</p>
-              ))}
-            </div>
+            <p className="mb-4 whitespace-pre-wrap">
+              {currentWordData.meaning}
+            </p>
           )}
           {!showMeaning && (
             <div>
