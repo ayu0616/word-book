@@ -122,7 +122,9 @@ export default function WordBookContent({
                 <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
               </DropdownMenuItem>
               <AddWordDialogTrigger wordBookId={wordBook.id}>
-                <DropdownMenuItem>単語を追加</DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  単語を追加
+                </DropdownMenuItem>
               </AddWordDialogTrigger>
               <DropdownMenuItem asChild>
                 <Link href={`/words/import?wordBookId=${wordBook.id}`}>
