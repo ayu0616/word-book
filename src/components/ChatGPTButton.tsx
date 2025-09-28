@@ -6,7 +6,7 @@ type ChatGPTButtonProps = {
 
 export function ChatGPTButton({ term }: ChatGPTButtonProps) {
   const prompt = encodeURIComponent(`「${term}」について教えてください。`);
-  const chatGPTUrl = `https://chat.openai.com/chat?q=${prompt}`;
+  const chatGPTUrl = `https://chatgpt.com?q=${prompt}`;
 
   return (
     <Button asChild>
