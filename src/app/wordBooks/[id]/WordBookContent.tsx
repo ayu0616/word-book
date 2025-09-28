@@ -125,12 +125,12 @@ export default function WordBookContent({
       <div className="flex items-center mb-4">
         <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
         <div className="flex gap-2">
-          <Link href={`/wordBooks/${wordBook.id}/learn`}>
-            <Button variant="outline" className="flex items-center gap-2">
+          <Button asChild variant="outline" className="flex items-center gap-2">
+            <Link href={`/wordBooks/${wordBook.id}/learn`}>
               <PlayIcon className="h-4 w-4" />
               学習を開始
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
