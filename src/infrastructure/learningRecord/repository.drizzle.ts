@@ -2,15 +2,14 @@ import { and, count, eq, isNull, lt, or } from "drizzle-orm";
 import type { LearningRecordRepository } from "@/application/learningRecord/ports";
 import { db } from "@/db";
 import { words } from "@/db/schema";
+import type { WordProps } from "@/domain/word/entities";
 import type { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate";
 import type { WordId } from "@/domain/word/value-objects/WordId";
 
 export class DrizzleLearningRecordRepository
   implements LearningRecordRepository
 {
-  async findWordsToLearn(
-    wordBookId: number,
-  ): Promise<(typeof words.$inferSelect)[]> {
+  async findWordsToLearn(wordBookId: number): Promise<WordProps[]> {
     const rows = await db
       .select()
       .from(words)

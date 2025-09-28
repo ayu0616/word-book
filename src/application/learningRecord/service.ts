@@ -1,5 +1,5 @@
 import type { WordRepository } from "@/application/word/ports";
-import type { words } from "@/db/schema";
+import type { WordProps } from "@/domain/word/entities";
 import type { WordId } from "@/domain/word/value-objects/WordId";
 import type { LearningRecordRepository } from "./ports";
 
@@ -28,9 +28,7 @@ export class LearningRecordService {
     return this.wordRepository.update(word);
   }
 
-  async getWordsToLearn(
-    wordBookId: number,
-  ): Promise<(typeof words.$inferSelect)[]> {
+  async getWordsToLearn(wordBookId: number): Promise<WordProps[]> {
     return this.learningRecordRepository.findWordsToLearn(wordBookId);
   }
 

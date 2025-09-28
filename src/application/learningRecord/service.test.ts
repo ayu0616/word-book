@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { words } from "@/db/schema";
-import { Word } from "@/domain/word/entities";
+import { Word, type WordProps } from "@/domain/word/entities";
 import { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import { WordId } from "@/domain/word/value-objects/WordId";
 import type { WordRepository } from "../word/ports";
@@ -9,7 +8,7 @@ import { LearningRecordService } from "./service";
 
 // Mock WordRepository
 class InMemoryWordRepository implements WordRepository {
-  private words: (typeof words.$inferSelect)[] = [];
+  private words: WordProps[] = [];
 
   async createWord(word: Word): Promise<Word> {
     const newWord = {
@@ -50,12 +49,12 @@ class InMemoryWordRepository implements WordRepository {
   }
 
   // Helper to add words for testing
-  addWord(word: typeof words.$inferSelect) {
+  addWord(word: WordProps) {
     this.words.push(word);
   }
 
   // Helper to update words for testing
-  updateWord(word: typeof words.$inferSelect) {
+  updateWord(word: WordProps) {
     const index = this.words.findIndex((w) => w.id === word.id);
     if (index !== -1) {
       this.words[index] = word;
@@ -68,11 +67,9 @@ class InMemoryWordRepository implements WordRepository {
 }
 
 class InMemoryLearningRecordRepository implements LearningRecordRepository {
-  private words: (typeof words.$inferSelect)[] = [];
+  private words: WordProps[] = [];
 
-  async findWordsToLearn(
-    wordBookId: number,
-  ): Promise<(typeof words.$inferSelect)[]> {
+  async findWordsToLearn(wordBookId: number): Promise<WordProps[]> {
     const now = new Date();
     const filteredWords = this.words.filter((word) => {
       const isDueForReview = word.nextReviewDate <= now;
@@ -106,7 +103,7 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
   }
 
   // Helper to add words for testing
-  addWord(word: typeof words.$inferSelect) {
+  addWord(word: WordProps) {
     this.words.push(word);
   }
 }
