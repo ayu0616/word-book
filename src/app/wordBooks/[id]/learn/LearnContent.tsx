@@ -37,14 +37,12 @@ export function LearnContent({ initialWords }: LearnContentProps) {
 
   const handleRecordResult = async (result: "correct" | "incorrect") => {
     if (!currentWordData) return;
-
-    setLearningStats((prev) => ({
-      ...prev,
-      correctCount:
-        result === "correct" ? prev.correctCount + 1 : prev.correctCount,
-      incorrectCount:
-        result === "incorrect" ? prev.incorrectCount + 1 : prev.incorrectCount,
-    }));
+    setLearningStats((prev) => {
+      if (result === "correct") {
+        return { ...prev, correctCount: prev.correctCount + 1 };
+      }
+      return { ...prev, incorrectCount: prev.incorrectCount + 1 };
+    });
 
     try {
       const res = await client.learning.record.$post({
