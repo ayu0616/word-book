@@ -3,10 +3,16 @@
 import { format } from "date-fns";
 import Link from "next/link";
 import { useCallback, useState } from "react";
-import { AddWordDialog } from "@/components/AddWordDialog";
+import { AddWordDialogTrigger } from "@/components/AddWordDialog";
 import { EditWordBookTitleModal } from "@/components/EditWordBookTitleModal";
 import { EditWordModal } from "@/components/EditWordModal";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { client } from "@/lib/hono";
 
 interface WordBook {
@@ -108,16 +114,25 @@ export default function WordBookContent({
         </Button>
       </div>
 
-      <div className="my-6 flex space-x-4">
-        <Button asChild>
-          <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
-        </Button>
-        <AddWordDialog wordBookId={wordBook.id} />
-        <Button asChild>
-          <Link href={`/words/import?wordBookId=${wordBook.id}`}>
-            CSVで単語をインポート
-          </Link>
-        </Button>
+      <div className="my-6">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">操作</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem asChild>
+              <Link href={`/wordBooks/${wordBook.id}/learn`}>学習を開始</Link>
+            </DropdownMenuItem>
+            <AddWordDialogTrigger wordBookId={wordBook.id}>
+              <DropdownMenuItem>単語を追加</DropdownMenuItem>
+            </AddWordDialogTrigger>
+            <DropdownMenuItem asChild>
+              <Link href={`/words/import?wordBookId=${wordBook.id}`}>
+                CSVで単語をインポート
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <ul className="my-6">
