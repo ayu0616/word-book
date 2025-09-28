@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { ChatGPTLink } from "@/components/ChatGPTLink";
+import { GoogleSearchLink } from "@/components/GoogleSearchLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { words } from "@/db/schema";
@@ -101,9 +103,9 @@ export function LearnContent({ initialWords }: LearnContentProps) {
               </Button>
             </div>
           )}
-          <div className="flex justify-center gap-4">
-            {showMeaning && (
-              <>
+          {showMeaning && (
+            <div className="space-y-4">
+              <div className="flex justify-center gap-4">
                 <Button
                   onClick={() => handleRecordResult("incorrect")}
                   variant="destructive"
@@ -113,9 +115,13 @@ export function LearnContent({ initialWords }: LearnContentProps) {
                 <Button onClick={() => handleRecordResult("correct")}>
                   正解した
                 </Button>
-              </>
-            )}
-          </div>
+              </div>
+              <div className="flex justify-center gap-4">
+                <GoogleSearchLink term={currentWordData.term} />
+                <ChatGPTLink term={currentWordData.term} />
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
