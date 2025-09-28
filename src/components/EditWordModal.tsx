@@ -21,14 +21,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { Word } from "@/domain/word/entities";
+import type { WordProps } from "@/domain/word/entities";
 import { client } from "@/lib/hono";
 
 interface EditWordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  word: Word;
-  onSave: (updatedWord: { id?: number; term: string; meaning: string }) => void;
+  word: WordProps;
+  onSave: (updatedWord: { id: number; term: string; meaning: string }) => void;
 }
 
 const formSchema = z.object({
@@ -47,8 +47,8 @@ export function EditWordModal({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      term: word.term.value,
-      meaning: word.meaning.value,
+      term: word.term,
+      meaning: word.meaning,
     },
   });
   const { isSubmitting } = form.formState;
@@ -58,7 +58,7 @@ export function EditWordModal({
       const res = await client.word[":id"].$put({
         json: values,
         param: {
-          id: word.id?.value.toString() ?? "",
+          id: word.id?.toString() ?? "",
         },
       });
 

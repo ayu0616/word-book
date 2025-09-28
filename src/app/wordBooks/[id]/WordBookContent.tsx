@@ -21,8 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Word } from "@/domain/word/entities";
-import { WordId } from "@/domain/word/value-objects/WordId";
+import type { WordProps } from "@/domain/word/entities";
 import { client } from "@/lib/hono";
 
 interface WordBook {
@@ -37,45 +36,35 @@ export default function WordBookContent({
   wordsToLearnCount,
 }: {
   wordBook: WordBook;
-  words: Word[];
+  words: WordProps[];
   wordsToLearnCount: number;
 }) {
   const [wordBook, setWordBook] = useState(initialWordBook);
-  const [words, setWords] = useState<Word[]>(initialWords);
+  const [words, setWords] = useState<WordProps[]>(initialWords);
   const [isWordModalOpen, setIsWordModalOpen] = useState(false);
-  const [editingWord, setEditingWord] = useState<Word | null>(null);
+  const [editingWord, setEditingWord] = useState<WordProps | null>(null);
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredWords = words.filter(
     (word) =>
-      word.term.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      word.meaning.value.toLowerCase().includes(searchTerm.toLowerCase()),
+      word.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      word.meaning.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleEditClick = (word: Word) => {
+  const handleEditClick = (word: WordProps) => {
     setEditingWord(word);
     setIsWordModalOpen(true);
   };
 
   const handleSaveWord = (updatedWord: {
-    id?: number;
+    id: number;
     term: string;
     meaning: string;
   }) => {
     setWords((prevWords) =>
       prevWords.map((word) =>
-        word.id?.value === updatedWord.id
-          ? Word.fromPersistence({
-              id: updatedWord.id ?? 0,
-              wordBookId: word.wordBookId.value,
-              term: updatedWord.term,
-              meaning: updatedWord.meaning,
-              createdAt: word.createdAt.value,
-              consecutiveCorrectCount: word.consecutiveCorrectCount,
-              nextReviewDate: word.nextReviewDate.value,
-            })
-          : word,
+        word.id === updatedWord.id ? { ...word, ...updatedWord } : word,
       ),
     );
     setIsWordModalOpen(false);
@@ -87,14 +76,14 @@ export default function WordBookContent({
     setEditingWord(null);
   };
 
-  const handleDeleteClick = useCallback(async (wordId: WordId) => {
+  const handleDeleteClick = useCallback(async (wordId: number) => {
     if (!confirm("Are you sure you want to delete this word?")) {
       return;
     }
 
     try {
       const res = await client.word[":id"].$delete({
-        param: { id: wordId.value.toString() },
+        param: { id: wordId.toString() },
       });
 
       if (!res.ok) {
@@ -102,9 +91,7 @@ export default function WordBookContent({
       }
 
       // Update the UI by removing the deleted word
-      setWords((prevWords) =>
-        prevWords.filter((word) => word.id?.value !== wordId.value),
-      );
+      setWords((prevWords) => prevWords.filter((word) => word.id !== wordId));
     } catch (error) {
       console.error("Error deleting word:", error);
       // Optionally, display an error message to the user
@@ -188,18 +175,17 @@ export default function WordBookContent({
         <ul className="space-y-2">
           {filteredWords.map((word) => (
             <li
-              key={word.id?.value}
+              key={word.id}
               className="p-3 border rounded-md shadow-sm flex justify-between items-center"
             >
               <div>
-                <p className="font-semibold">{word.term.value}</p>
-                <p className="text-gray-600">{word.meaning.value}</p>
+                <p className="font-semibold">{word.term}</p>
+                <p className="text-gray-600">{word.meaning}</p>
                 <p className="text-sm text-gray-500">
-                  作成日: {format(word.createdAt.value, "yyyy-MM-dd")}
+                  作成日: {format(word.createdAt, "yyyy-MM-dd")}
                 </p>
                 <p className="text-sm text-gray-500">
-                  次回の復習日:{" "}
-                  {format(word.nextReviewDate.value, "yyyy-MM-dd")}
+                  次回の復習日: {format(word.nextReviewDate, "yyyy-MM-dd")}
                 </p>
                 <p className="text-sm text-gray-500">
                   連続正解数: {word.consecutiveCorrectCount}
@@ -216,9 +202,7 @@ export default function WordBookContent({
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() =>
-                    word.id && handleDeleteClick(WordId.create(word.id.value))
-                  }
+                  onClick={() => word.id && handleDeleteClick(word.id)}
                 >
                   Delete
                 </Button>
