@@ -125,6 +125,12 @@ export default function WordBookContent({
       <div className="flex items-center mb-4">
         <h1 className="text-2xl font-bold mr-4">{wordBook.title}</h1>
         <div className="flex gap-2">
+          <Link href={`/wordBooks/${wordBook.id}/learn`}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <PlayIcon className="h-4 w-4" />
+              学習を開始
+            </Button>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
@@ -136,12 +142,7 @@ export default function WordBookContent({
                 <PencilIcon className="mr-2 h-4 w-4" />
                 編集
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/wordBooks/${wordBook.id}/learn`}>
-                  <PlayIcon className="mr-2 h-4 w-4" />
-                  学習を開始
-                </Link>
-              </DropdownMenuItem>
+
               <AddWordDialogTrigger wordBookId={wordBook.id}>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <PlusIcon className="mr-2 h-4 w-4" />
