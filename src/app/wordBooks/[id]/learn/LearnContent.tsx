@@ -14,11 +14,13 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSendIncorrect, setIsSendIncorrect] = useState(false);
+  const [isSendIncorrect, _setIsSendIncorrect] = useState(false);
 
-  const [correctCount, setCorrectCount] = useState(0);
-  const [incorrectCount, setIncorrectCount] = useState(0);
-  const [learnedWordsCount, setLearnedWordsCount] = useState(0);
+  const [learningStats, setLearningStats] = useState({
+    correctCount: 0,
+    incorrectCount: 0,
+    learnedWordsCount: 0,
+  });
 
   const currentWordData =
     initialWords.length > 0 && currentWordIndex < initialWords.length
@@ -37,13 +39,14 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   const handleRecordResult = async (result: "correct" | "incorrect") => {
     if (!currentWordData) return;
 
-    if (result === "incorrect") {
-      setIsSendIncorrect(true);
-      setIncorrectCount((prev) => prev + 1);
-    } else {
-      setCorrectCount((prev) => prev + 1);
-    }
-    setLearnedWordsCount((prev) => prev + 1);
+    setLearningStats((prev) => ({
+      ...prev,
+      correctCount:
+        result === "correct" ? prev.correctCount + 1 : prev.correctCount,
+      incorrectCount:
+        result === "incorrect" ? prev.incorrectCount + 1 : prev.incorrectCount,
+      learnedWordsCount: prev.learnedWordsCount + 1,
+    }));
 
     try {
       const res = await client.learning.record.$post({
@@ -96,9 +99,9 @@ export function LearnContent({ initialWords }: LearnContentProps) {
         <CardHeader>
           <CardTitle>{currentWordData.term}</CardTitle>
           <div className="text-sm text-muted-foreground">
-            <p>学習単語数: {learnedWordsCount}</p>
-            <p>正解数: {correctCount}</p>
-            <p>不正解数: {incorrectCount}</p>
+            <p>学習単語数: {learningStats.learnedWordsCount}</p>
+            <p>正解数: {learningStats.correctCount}</p>
+            <p>不正解数: {learningStats.incorrectCount}</p>
           </div>
         </CardHeader>
         <CardContent>
