@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { SearchButtons } from "@/components/SearchButtons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { words } from "@/db/schema";
@@ -25,29 +26,6 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     setShowMeaning(false);
     setCurrentWordIndex((prevIndex) => prevIndex + 1);
   }, []);
-
-  const handleGoogleSearch = useCallback(() => {
-    if (currentWordData?.term) {
-      window.open(
-        `https://www.google.com/search?q=${currentWordData.term}`,
-        "_blank",
-        "noopener,noreferrer",
-      );
-    }
-  }, [currentWordData]);
-
-  const handleChatGPT = useCallback(() => {
-    if (currentWordData?.term) {
-      const prompt = encodeURIComponent(
-        `「${currentWordData.term}」について教えてください。`,
-      );
-      window.open(
-        `https://chat.openai.com/chat?q=${prompt}`,
-        "_blank",
-        "noopener,noreferrer",
-      );
-    }
-  }, [currentWordData]);
 
   const handleShowAnswer = () => {
     setShowMeaning(true);
@@ -132,8 +110,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
                 <Button onClick={() => handleRecordResult("correct")}>
                   正解した
                 </Button>
-                <Button onClick={handleGoogleSearch}>Googleで検索</Button>
-                <Button onClick={handleChatGPT}>ChatGPTに聞く</Button>
+                <SearchButtons term={currentWordData.term} />
               </>
             )}
           </div>
