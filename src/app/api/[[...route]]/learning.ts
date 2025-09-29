@@ -3,7 +3,11 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel"; // handle をインポート
 import { z } from "zod";
 import { LearningRecordService } from "@/application/learningRecord/service";
-import { WordId } from "@/domain/word/value-objects/WordId"; // WordId をインポート
+import { handle } from "hono/vercel";
+import { z } from "zod";
+import { LearningRecordService } from "@/application/learningRecord/service";
+import { WordId } from "@/domain/word/value-objects/WordId";
+import { DrizzleLearningRecordRepository } from "@/infrastructure/learningRecord/repository.drizzle";
 import { DrizzleLearningRecordRepository } from "@/infrastructure/learningRecord/repository.drizzle";
 import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
 
