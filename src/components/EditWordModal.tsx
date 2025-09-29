@@ -61,7 +61,7 @@ export function EditWordModal({
           id: word.id?.toString() ?? "",
         },
       });
-
+          id: word.id.toString(),
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error ?? "単語の更新に失敗しました。");
