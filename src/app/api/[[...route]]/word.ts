@@ -104,15 +104,7 @@ export const WordController = new Hono()
     return c.json(
       {
         ok: true,
-        words: words.map((word) => ({
-          id: word.id.value,
-          wordBookId: word.wordBookId.value,
-          term: word.term.value,
-          meaning: word.meaning.value,
-          createdAt: word.createdAt.value,
-          consecutiveCorrectCount: word.consecutiveCorrectCount,
-          nextReviewDate: word.nextReviewDate.value,
-        })),
+        words: words.map((word) => word.toJson()),
       },
       200,
     );

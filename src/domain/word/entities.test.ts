@@ -22,7 +22,7 @@ describe("Word", () => {
     expect(word.term).toEqual(term);
     expect(word.meaning).toEqual(meaning);
     expect(word.createdAt).toBeInstanceOf(CreatedAt);
-    expect(word.consecutiveCorrectCount).toBe(0);
+    expect(word.consecutiveCorrectCount.value).toBe(0);
     expect(word.nextReviewDate).toBeInstanceOf(NextReviewDate);
   });
 
@@ -50,7 +50,7 @@ describe("Word", () => {
     expect(word.meaning.value).toBe("永続化された");
     expect(word.createdAt).toBeInstanceOf(CreatedAt);
     expect(word.createdAt.value).toEqual(now);
-    expect(word.consecutiveCorrectCount).toBe(0);
+    expect(word.consecutiveCorrectCount.value).toBe(0);
     expect(word.nextReviewDate).toBeInstanceOf(NextReviewDate);
     expect(word.nextReviewDate.value).toEqual(now);
   });
@@ -73,7 +73,7 @@ describe("Word", () => {
     });
 
     word.markAsCorrect();
-    expect(word.consecutiveCorrectCount).toBe(1);
+    expect(word.consecutiveCorrectCount.value).toBe(1);
     // 1日後
     const expectedDate1 = new Date();
     expectedDate1.setDate(expectedDate1.getDate() + 1);
@@ -82,7 +82,7 @@ describe("Word", () => {
     );
 
     word.markAsCorrect();
-    expect(word.consecutiveCorrectCount).toBe(2);
+    expect(word.consecutiveCorrectCount.value).toBe(2);
     // 2日後
     const expectedDate2 = new Date();
     expectedDate2.setDate(expectedDate2.getDate() + 2);

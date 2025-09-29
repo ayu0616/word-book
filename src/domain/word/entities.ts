@@ -1,3 +1,4 @@
+import { ConsecutiveCorrectCount } from "./value-objects/ConsecutiveCorrectCount";
 import { CreatedAt } from "./value-objects/CreatedAt";
 import { Meaning } from "./value-objects/Meaning";
 import { NextReviewDate } from "./value-objects/NextReviewDate";
@@ -21,7 +22,7 @@ export class Word {
   readonly term: Term;
   readonly meaning: Meaning;
   readonly createdAt: CreatedAt;
-  readonly consecutiveCorrectCount: number;
+  readonly consecutiveCorrectCount: ConsecutiveCorrectCount;
   readonly nextReviewDate: NextReviewDate;
 
   protected constructor(
@@ -30,7 +31,7 @@ export class Word {
     term: Term,
     meaning: Meaning,
     createdAt: CreatedAt,
-    consecutiveCorrectCount: number,
+    consecutiveCorrectCount: ConsecutiveCorrectCount,
     nextReviewDate: NextReviewDate,
   ) {
     this.id = id;
@@ -53,7 +54,7 @@ export class Word {
       props.term,
       props.meaning,
       CreatedAt.create(new Date()),
-      0,
+      ConsecutiveCorrectCount.from(0),
       NextReviewDate.create(new Date()),
     );
   }
@@ -65,16 +66,14 @@ export class Word {
       Term.create(props.term),
       Meaning.create(props.meaning),
       CreatedAt.create(props.createdAt),
-      props.consecutiveCorrectCount,
+      ConsecutiveCorrectCount.from(props.consecutiveCorrectCount),
       NextReviewDate.create(props.nextReviewDate),
     );
   }
 
   markAsCorrect(): void {
-    const newConsecutiveCorrectCount = this.consecutiveCorrectCount + 1;
-    const daysToAdd = 2 ** (newConsecutiveCorrectCount - 1);
-    const newNextReviewDate = new Date();
-    newNextReviewDate.setDate(newNextReviewDate.getDate() + daysToAdd);
+    const newConsecutiveCorrectCount = this.consecutiveCorrectCount.add();
+    const newNextReviewDate = newConsecutiveCorrectCount.nextReviewDate();
     Object.assign(this, {
       consecutiveCorrectCount: newConsecutiveCorrectCount,
       nextReviewDate: NextReviewDate.create(newNextReviewDate),
@@ -95,7 +94,7 @@ export class Word {
       term: this.term.value,
       meaning: this.meaning.value,
       createdAt: this.createdAt.value,
-      consecutiveCorrectCount: this.consecutiveCorrectCount,
+      consecutiveCorrectCount: this.consecutiveCorrectCount.value,
       nextReviewDate: this.nextReviewDate.value,
     };
   }

@@ -117,7 +117,7 @@ describe("DrizzleWordRepository", () => {
         term: mockWord.term.value,
         meaning: mockWord.meaning.value,
         createdAt: mockWord.createdAt.value,
-        consecutiveCorrectCount: mockWord.consecutiveCorrectCount,
+        consecutiveCorrectCount: mockWord.consecutiveCorrectCount.value,
         nextReviewDate: mockWord.nextReviewDate.value,
       });
       expect(Word.fromPersistence).toHaveBeenCalledWith(mockNewWordRow);
@@ -247,7 +247,7 @@ describe("DrizzleWordRepository", () => {
       expect((db.update as Mock)().set).toHaveBeenCalledWith({
         term: mockWord.term.value,
         meaning: mockWord.meaning.value,
-        consecutiveCorrectCount: mockWord.consecutiveCorrectCount,
+        consecutiveCorrectCount: mockWord.consecutiveCorrectCount.value,
         nextReviewDate: mockWord.nextReviewDate.value,
       });
       expect(mockWhere).toHaveBeenCalledWith(

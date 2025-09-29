@@ -41,7 +41,7 @@ export class WordService {
       term: input.term.value,
       meaning: input.meaning.value,
       createdAt: existingWord.createdAt.value,
-      consecutiveCorrectCount: existingWord.consecutiveCorrectCount,
+      consecutiveCorrectCount: existingWord.consecutiveCorrectCount.value,
       nextReviewDate: existingWord.nextReviewDate.value,
     });
 

@@ -18,7 +18,7 @@ class InMemoryWordRepository implements WordRepository {
       term: word.term.value,
       meaning: word.meaning.value,
       createdAt: word.createdAt.value,
-      consecutiveCorrectCount: word.consecutiveCorrectCount,
+      consecutiveCorrectCount: word.consecutiveCorrectCount.value,
       nextReviewDate: word.nextReviewDate.value,
     };
     this.words.push(newWord);
@@ -43,7 +43,7 @@ class InMemoryWordRepository implements WordRepository {
         ...this.words[index],
         term: word.term.value,
         meaning: word.meaning.value,
-        consecutiveCorrectCount: word.consecutiveCorrectCount,
+        consecutiveCorrectCount: word.consecutiveCorrectCount.value,
         nextReviewDate: word.nextReviewDate.value,
       };
     }
@@ -183,7 +183,7 @@ describe("LearningRecordService", () => {
       expect(wordRepository.update).toHaveBeenCalledOnce(); // updateが一度呼ばれたことを確認
 
       const updatedWord = await wordRepository.findById(wordId);
-      expect(updatedWord?.consecutiveCorrectCount).toBe(1);
+      expect(updatedWord?.consecutiveCorrectCount.value).toBe(1);
       const expectedNextReviewDate1 = new Date();
       expectedNextReviewDate1.setDate(expectedNextReviewDate1.getDate() + 1); // 1日後
       expect(updatedWord?.nextReviewDate.value.toDateString()).toBe(

@@ -16,7 +16,7 @@ export class DrizzleWordRepository implements WordRepository {
         term: word.term.value,
         meaning: word.meaning.value,
         createdAt: word.createdAt.value,
-        consecutiveCorrectCount: word.consecutiveCorrectCount,
+        consecutiveCorrectCount: word.consecutiveCorrectCount.value,
         nextReviewDate: word.nextReviewDate.value,
       })
       .returning();
@@ -77,7 +77,7 @@ export class DrizzleWordRepository implements WordRepository {
       .set({
         term: word.term.value,
         meaning: word.meaning.value,
-        consecutiveCorrectCount: word.consecutiveCorrectCount,
+        consecutiveCorrectCount: word.consecutiveCorrectCount.value,
         nextReviewDate: word.nextReviewDate.value,
       })
       .where(eq(words.id, word.id.value));
