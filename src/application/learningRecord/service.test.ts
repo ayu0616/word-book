@@ -70,7 +70,7 @@ class InMemoryWordRepository implements WordRepository {
 class InMemoryLearningRecordRepository implements LearningRecordRepository {
   private words: WordProps[] = [];
 
-  async findWordsToLearn(wordBookId: number): Promise<WordProps[]> {
+  async findWordsToLearn(wordBookId: number): Promise<Word[]> {
     const now = new Date();
     const filteredWords = this.words.filter((word) => {
       const isDueForReview = word.nextReviewDate <= now;
@@ -84,7 +84,7 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
       );
     });
 
-    return filteredWords;
+    return filteredWords.map(Word.fromPersistence);
   }
 
   async countWordsToLearn(wordBookId: number): Promise<number> {
@@ -291,7 +291,7 @@ describe("LearningRecordService", () => {
       const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(2);
-      expect(wordsToLearn[0].id).toBe(wordId1);
+      expect(wordsToLearn[0].id.value).toBe(wordId1);
     });
 
     it("should not return mastered words", async () => {
@@ -335,7 +335,7 @@ describe("LearningRecordService", () => {
       const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(1);
-      expect(wordsToLearn[0].id).toBe(wordId);
+      expect(wordsToLearn[0].id.value).toBe(wordId);
     });
   });
 

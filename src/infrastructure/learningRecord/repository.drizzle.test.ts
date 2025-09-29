@@ -11,6 +11,7 @@ import {
 } from "vitest";
 import { db } from "@/db";
 import { words } from "@/db/schema";
+import type { WordProps } from "@/domain/word/entities";
 import { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate"; // 追加
 import { WordId } from "@/domain/word/value-objects/WordId"; // 追加
 import { DrizzleLearningRecordRepository } from "./repository.drizzle";
@@ -51,9 +52,26 @@ describe("DrizzleLearningRecordRepository", () => {
   describe("findWordsToLearn", () => {
     it("should return words to learn based on wordBookId and review date", async () => {
       const mockWordBookId = 1;
-      const mockWords = [
-        { id: 1, wordBookId: 1, nextReviewDate: new Date("2023-01-01") },
-        { id: 2, wordBookId: 1, nextReviewDate: null },
+      // モックデータを作成
+      const mockWords: WordProps[] = [
+        {
+          id: createId(),
+          term: "term1",
+          meaning: "意味1",
+          wordBookId: mockWordBookId,
+          createdAt: new Date("2022-12-01"),
+          consecutiveCorrectCount: 0,
+          nextReviewDate: new Date("2023-01-01"),
+        },
+        {
+          id: createId(),
+          term: "term2",
+          meaning: "意味2",
+          wordBookId: mockWordBookId,
+          createdAt: new Date("2022-12-02"),
+          consecutiveCorrectCount: 1,
+          nextReviewDate: new Date("2023-01-02"),
+        },
       ];
 
       (db.select as Mock).mockReturnValue({
@@ -63,7 +81,7 @@ describe("DrizzleLearningRecordRepository", () => {
 
       const result = await repository.findWordsToLearn(mockWordBookId);
 
-      expect(result).toEqual(mockWords);
+      expect(result.map((w) => w.toJson())).toEqual(mockWords);
       expect(db.select).toHaveBeenCalled();
       expect((db.select as Mock)().from).toHaveBeenCalledWith(words);
       expect((db.select as Mock)().from().where).toHaveBeenCalledWith(

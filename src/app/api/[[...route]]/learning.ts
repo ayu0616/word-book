@@ -27,7 +27,7 @@ export const LearningController = new Hono()
       const { wordBookId } = c.req.valid("param");
       const wordsToLearn =
         await learningRecordService.getWordsToLearn(wordBookId);
-      return c.json(wordsToLearn);
+      return c.json(wordsToLearn.map((w) => w.toJson()));
     },
   )
   .get(
