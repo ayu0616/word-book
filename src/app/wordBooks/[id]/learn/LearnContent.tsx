@@ -5,11 +5,11 @@ import { ChatGPTLink } from "@/components/ChatGPTLink";
 import { GoogleSearchLink } from "@/components/GoogleSearchLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { words } from "@/db/schema";
+import type { WordProps } from "@/domain/word/entities";
 import { client } from "@/lib/hono";
 
 type LearnContentProps = {
-  initialWords: (typeof words.$inferSelect)[];
+  initialWords: WordProps[];
 };
 
 export function LearnContent({ initialWords }: LearnContentProps) {

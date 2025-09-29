@@ -7,6 +7,7 @@
   - @../.serena/memories/suggested_commands.md
   - @../.serena/memories/task_completion_guidelines.md
   - @../.serena/memories/tech_stack.md
+  - @../.serena/memories/word_ddd_refactoring_policy.md
 
 ## Serena MCP使用ガイドライン
 

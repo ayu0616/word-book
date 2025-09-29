@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import type { WordProps } from "@/domain/word/entities";
 import { client } from "@/lib/hono";
 
 interface WordBook {
@@ -29,29 +30,19 @@ interface WordBook {
   title: string;
 }
 
-interface Word {
-  id: number;
-  wordBookId: number;
-  term: string;
-  meaning: string;
-  createdAt: string;
-  nextReviewDate: string;
-  consecutiveCorrectCount: number;
-}
-
 export default function WordBookContent({
   wordBook: initialWordBook,
   words: initialWords,
   wordsToLearnCount,
 }: {
   wordBook: WordBook;
-  words: Word[];
+  words: WordProps[];
   wordsToLearnCount: number;
 }) {
   const [wordBook, setWordBook] = useState(initialWordBook);
-  const [words, setWords] = useState(initialWords);
+  const [words, setWords] = useState<WordProps[]>(initialWords);
   const [isWordModalOpen, setIsWordModalOpen] = useState(false);
-  const [editingWord, setEditingWord] = useState<Word | null>(null);
+  const [editingWord, setEditingWord] = useState<WordProps | null>(null);
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -61,13 +52,13 @@ export default function WordBookContent({
       word.meaning.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const handleEditClick = (word: Word) => {
+  const handleEditClick = (word: WordProps) => {
     setEditingWord(word);
     setIsWordModalOpen(true);
   };
 
   const handleSaveWord = (updatedWord: {
-    id: number;
+    id: string;
     term: string;
     meaning: string;
   }) => {
@@ -85,7 +76,7 @@ export default function WordBookContent({
     setEditingWord(null);
   };
 
-  const handleDeleteClick = useCallback(async (wordId: number) => {
+  const handleDeleteClick = useCallback(async (wordId: string) => {
     if (!confirm("Are you sure you want to delete this word?")) {
       return;
     }
@@ -191,11 +182,10 @@ export default function WordBookContent({
                 <p className="font-semibold">{word.term}</p>
                 <p className="text-gray-600">{word.meaning}</p>
                 <p className="text-sm text-gray-500">
-                  作成日: {format(new Date(word.createdAt), "yyyy-MM-dd")}
+                  作成日: {format(word.createdAt, "yyyy-MM-dd")}
                 </p>
                 <p className="text-sm text-gray-500">
-                  次回の復習日:{" "}
-                  {format(new Date(word.nextReviewDate), "yyyy-MM-dd")}
+                  次回の復習日: {format(word.nextReviewDate, "yyyy-MM-dd")}
                 </p>
                 <p className="text-sm text-gray-500">
                   連続正解数: {word.consecutiveCorrectCount}
@@ -212,7 +202,7 @@ export default function WordBookContent({
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDeleteClick(word.id)}
+                  onClick={() => word.id && handleDeleteClick(word.id)}
                 >
                   Delete
                 </Button>

@@ -1,11 +1,26 @@
-import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import { createId } from "@paralleldrive/cuid2";
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+  vitest,
+} from "vitest";
 import { db } from "@/db";
 import { words } from "@/db/schema";
 import { Word } from "@/domain/word/entities";
+import { CreatedAt } from "@/domain/word/value-objects/CreatedAt";
+import { Meaning } from "@/domain/word/value-objects/Meaning";
+import { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate";
+import { Term } from "@/domain/word/value-objects/Term";
+import { WordBookId } from "@/domain/word/value-objects/WordBookId";
+import { WordId } from "@/domain/word/value-objects/WordId";
 import { DrizzleWordRepository } from "./repository.drizzle";
 
 // Mock the db object
-vi.mock("@/db", () => ({
+vitest.mock("@/db", () => ({
   db: {
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
@@ -31,7 +46,7 @@ vi.mock("@/db", () => ({
 }));
 
 // Mock drizzle-orm functions
-vi.mock("drizzle-orm", async (importOriginal) => {
+vitest.mock("drizzle-orm", async (importOriginal) => {
   const mod = await importOriginal<typeof import("drizzle-orm")>();
   return {
     ...mod,
@@ -40,16 +55,25 @@ vi.mock("drizzle-orm", async (importOriginal) => {
 });
 
 // Mock Word entity
-vi.mock("@/domain/word/entities", () => ({
+vitest.mock("@/domain/word/entities", () => ({
   Word: {
     fromPersistence: vi.fn((data) => ({
-      id: data.id,
+      id: WordId.from(data.id),
+      wordBookId: WordBookId.create(data.wordBookId),
+      term: Term.create(data.term),
+      meaning: Meaning.create(data.meaning),
+      createdAt: CreatedAt.create(data.createdAt),
+      consecutiveCorrectCount: data.consecutiveCorrectCount,
+      nextReviewDate: NextReviewDate.create(data.nextReviewDate),
+    })),
+    create: vi.fn((data) => ({
+      id: WordId.create(),
       wordBookId: data.wordBookId,
       term: data.term,
       meaning: data.meaning,
-      createdAt: data.createdAt,
-      consecutiveCorrectCount: data.consecutiveCorrectCount,
-      nextReviewDate: data.nextReviewDate,
+      createdAt: CreatedAt.create(new Date()),
+      consecutiveCorrectCount: 0,
+      nextReviewDate: NextReviewDate.create(new Date()),
     })),
   },
 }));
@@ -64,17 +88,19 @@ describe("DrizzleWordRepository", () => {
 
   describe("createWord", () => {
     it("should create and return a new Word", async () => {
-      const mockWord = {
+      const mockWord = Word.create({
+        wordBookId: WordBookId.create(1),
+        term: Term.create("test"),
+        meaning: Meaning.create("テスト"),
+      });
+      const mockNewWordRow = {
+        id: mockWord.id.value,
         wordBookId: 1,
         term: "test",
         meaning: "テスト",
         createdAt: new Date(),
-      };
-      const mockNewWordRow = {
-        id: 1,
-        ...mockWord,
         consecutiveCorrectCount: 0,
-        nextReviewDate: null,
+        nextReviewDate: new Date(),
       };
 
       (db.insert as Mock).mockReturnValue({
@@ -82,23 +108,26 @@ describe("DrizzleWordRepository", () => {
         returning: vi.fn().mockResolvedValue([mockNewWordRow]),
       });
 
-      const result = await repository.createWord(mockWord as Word);
+      const result = await repository.createWord(mockWord);
 
       expect(db.insert).toHaveBeenCalledWith(words);
       expect((db.insert as Mock)().values).toHaveBeenCalledWith({
-        wordBookId: mockWord.wordBookId,
-        term: mockWord.term,
-        meaning: mockWord.meaning,
-        createdAt: mockWord.createdAt,
+        id: mockWord.id.value,
+        wordBookId: mockWord.wordBookId.value,
+        term: mockWord.term.value,
+        meaning: mockWord.meaning.value,
+        createdAt: mockWord.createdAt.value,
+        consecutiveCorrectCount: mockWord.consecutiveCorrectCount.value,
+        nextReviewDate: mockWord.nextReviewDate.value,
       });
       expect(Word.fromPersistence).toHaveBeenCalledWith(mockNewWordRow);
-      expect(result).toEqual(mockNewWordRow);
+      expect(result.id?.value).toEqual(mockNewWordRow.id);
     });
   });
 
   describe("findById", () => {
     it("should return a Word if found by ID", async () => {
-      const mockId = 1;
+      const mockId = createId();
       const mockWordRow = {
         id: mockId,
         wordBookId: 1,
@@ -106,7 +135,7 @@ describe("DrizzleWordRepository", () => {
         meaning: "テスト",
         createdAt: new Date(),
         consecutiveCorrectCount: 0,
-        nextReviewDate: null,
+        nextReviewDate: new Date(),
       };
 
       (db.select as Mock).mockReturnValue({
@@ -116,7 +145,7 @@ describe("DrizzleWordRepository", () => {
         })),
       });
 
-      const result = await repository.findById(mockId);
+      const result = await repository.findById(WordId.from(mockId));
 
       expect(db.select).toHaveBeenCalled();
       expect((db.select as Mock)().from).toHaveBeenCalledWith(words);
@@ -127,11 +156,11 @@ describe("DrizzleWordRepository", () => {
         }),
       );
       expect(Word.fromPersistence).toHaveBeenCalledWith(mockWordRow);
-      expect(result).toEqual(mockWordRow);
+      expect(result?.id?.value).toEqual(mockWordRow.id);
     });
 
     it("should return undefined if not found by ID", async () => {
-      const mockId = 999;
+      const mockId = createId();
 
       (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnThis(),
@@ -140,7 +169,7 @@ describe("DrizzleWordRepository", () => {
         })),
       });
 
-      const result = await repository.findById(mockId);
+      const result = await repository.findById(WordId.from(mockId));
 
       expect(result).toBeUndefined();
       expect(Word.fromPersistence).not.toHaveBeenCalled();
@@ -152,22 +181,22 @@ describe("DrizzleWordRepository", () => {
       const mockWordBookId = 1;
       const mockWordRows = [
         {
-          id: 1,
+          id: createId(),
           wordBookId: mockWordBookId,
           term: "test1",
           meaning: "テスト1",
           createdAt: new Date(),
           consecutiveCorrectCount: 0,
-          nextReviewDate: null,
+          nextReviewDate: new Date(),
         },
         {
-          id: 2,
+          id: createId(),
           wordBookId: mockWordBookId,
           term: "test2",
           meaning: "テスト2",
           createdAt: new Date(),
           consecutiveCorrectCount: 0,
-          nextReviewDate: null,
+          nextReviewDate: new Date(),
         },
       ];
 
@@ -176,7 +205,9 @@ describe("DrizzleWordRepository", () => {
         where: vi.fn().mockResolvedValue(mockWordRows),
       });
 
-      const result = await repository.findWordsByWordBookId(mockWordBookId);
+      const result = await repository.findWordsByWordBookId(
+        WordBookId.create(mockWordBookId),
+      );
 
       expect(db.select).toHaveBeenCalled();
       expect((db.select as Mock)().from).toHaveBeenCalledWith(words);
@@ -187,21 +218,22 @@ describe("DrizzleWordRepository", () => {
         }),
       );
       expect(Word.fromPersistence).toHaveBeenCalledTimes(mockWordRows.length);
-      expect(result).toEqual(mockWordRows);
+      expect(result[0].id?.value).toEqual(mockWordRows[0].id);
+      expect(result[1].id?.value).toEqual(mockWordRows[1].id);
     });
   });
 
   describe("update", () => {
     it("should update an existing word", async () => {
-      const mockWord = {
-        id: 1,
+      const mockWord = Word.fromPersistence({
+        id: createId(),
         wordBookId: 1,
         term: "updated_test",
         meaning: "更新テスト",
         createdAt: new Date(),
         consecutiveCorrectCount: 1,
         nextReviewDate: new Date(),
-      };
+      });
 
       const mockWhere = vi.fn();
       (db.update as Mock).mockReturnValue({
@@ -209,19 +241,19 @@ describe("DrizzleWordRepository", () => {
         where: mockWhere,
       });
 
-      await repository.update(mockWord as Word);
+      await repository.update(mockWord);
 
       expect(db.update).toHaveBeenCalledWith(words);
       expect((db.update as Mock)().set).toHaveBeenCalledWith({
-        term: mockWord.term,
-        meaning: mockWord.meaning,
-        consecutiveCorrectCount: mockWord.consecutiveCorrectCount,
-        nextReviewDate: mockWord.nextReviewDate,
+        term: mockWord.term.value,
+        meaning: mockWord.meaning.value,
+        consecutiveCorrectCount: mockWord.consecutiveCorrectCount.value,
+        nextReviewDate: mockWord.nextReviewDate.value,
       });
       expect(mockWhere).toHaveBeenCalledWith(
         expect.objectContaining({
           __isDrizzleEq: true,
-          value: mockWord.id,
+          value: mockWord.id?.value,
         }),
       );
     });
@@ -229,13 +261,13 @@ describe("DrizzleWordRepository", () => {
 
   describe("delete", () => {
     it("should delete a word by ID", async () => {
-      const mockId = 1;
+      const mockId = createId();
       const mockWhere = vi.fn();
       (db.delete as Mock).mockReturnValue({
         where: mockWhere,
       });
 
-      await repository.delete(mockId);
+      await repository.delete(WordId.from(mockId));
 
       expect(db.delete).toHaveBeenCalledWith(words);
       expect(mockWhere).toHaveBeenCalledWith(

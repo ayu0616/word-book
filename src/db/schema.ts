@@ -23,7 +23,7 @@ export const wordBooks = pgTable("word_books", (t) => ({
 }));
 
 export const words = pgTable("words", (t) => ({
-  id: t.serial("id").primaryKey(),
+  id: t.char("id", { length: 24 }).primaryKey(),
   wordBookId: t
     .serial("word_book_id")
     .references(() => wordBooks.id)

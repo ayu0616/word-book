@@ -2,7 +2,7 @@
 
 When a task is completed, the following steps should be taken to ensure code quality and project stability:
 
-1.  **Run Tests:** Execute `bun test` to ensure all tests pass and no regressions have been introduced.
+1.  **Run Tests:** Execute `bun run test` to ensure all tests pass and no regressions have been introduced.
 2.  **Type Check:** Run `bun typecheck` to verify type safety.
 3.  **Lint Code:** Run `bun lint` to check for linting errors and adherence to code style.
 4.  **Format Code:** Run `bun format` to automatically format the code according to project conventions.

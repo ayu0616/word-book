@@ -21,17 +21,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { WordProps } from "@/domain/word/entities";
 import { client } from "@/lib/hono";
 
 interface EditWordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  word: {
-    id: number;
-    term: string;
-    meaning: string;
-  };
-  onSave: (updatedWord: { id: number; term: string; meaning: string }) => void;
+  word: WordProps;
+  onSave: (updatedWord: { id: string; term: string; meaning: string }) => void;
 }
 
 const formSchema = z.object({
@@ -61,17 +58,20 @@ export function EditWordModal({
       const res = await client.word[":id"].$put({
         json: values,
         param: {
-          id: word.id.toString(),
+          id: word.id?.toString() ?? "",
         },
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error ?? "単語の更新に失敗しました。");
       }
 
       const updatedWord = await res.json();
-      onSave(updatedWord.word); // Assuming the API returns { ok: true, word: updatedWord }
+      onSave({
+        id: updatedWord.word.id,
+        term: updatedWord.word.term,
+        meaning: updatedWord.word.meaning,
+      });
       onClose();
     } catch (error: unknown) {
       console.error("単語の更新エラー:", error);

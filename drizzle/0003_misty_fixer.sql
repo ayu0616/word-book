@@ -1,0 +1,1 @@
+ALTER TABLE "words" ALTER COLUMN "id" SET DATA TYPE char(24);

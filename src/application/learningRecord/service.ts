@@ -1,5 +1,6 @@
 import type { WordRepository } from "@/application/word/ports";
-import type { words } from "@/db/schema";
+import type { Word } from "@/domain/word/entities";
+import type { WordId } from "@/domain/word/value-objects/WordId";
 import type { LearningRecordRepository } from "./ports";
 
 export class LearningRecordService {
@@ -8,48 +9,26 @@ export class LearningRecordService {
     private readonly wordRepository: WordRepository,
   ) {}
 
-  private calculateNextReviewDate(consecutiveCorrectCount: number): Date {
-    const days = Math.floor(2 ** (consecutiveCorrectCount - 1));
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    return date;
-  }
-
-  async recordLearningResult(params: {
-    wordId: number;
-    result: "correct" | "incorrect";
-  }): Promise<void> {
-    const word = await this.wordRepository.findById(params.wordId);
+  async recordLearningResult(
+    wordId: WordId,
+    isCorrect: boolean,
+  ): Promise<void> {
+    const word = await this.wordRepository.findById(wordId);
 
     if (!word) {
       throw new Error("Word not found");
     }
 
-    let newConsecutiveCorrectCount = word.consecutiveCorrectCount;
-    let newNextReviewDate = word.nextReviewDate;
-
-    if (params.result === "correct") {
-      newConsecutiveCorrectCount++;
-      newNextReviewDate = this.calculateNextReviewDate(
-        newConsecutiveCorrectCount,
-      );
+    if (isCorrect) {
+      word.markAsCorrect();
     } else {
-      newConsecutiveCorrectCount = 0;
-      newNextReviewDate = this.calculateNextReviewDate(
-        newConsecutiveCorrectCount,
-      ); // 1 day from now
+      word.markAsIncorrect();
     }
 
-    await this.learningRecordRepository.updateWordLearningData(
-      params.wordId,
-      newConsecutiveCorrectCount,
-      newNextReviewDate,
-    );
+    return this.wordRepository.update(word);
   }
 
-  async getWordsToLearn(
-    wordBookId: number,
-  ): Promise<(typeof words.$inferSelect)[]> {
+  async getWordsToLearn(wordBookId: number): Promise<Word[]> {
     return this.learningRecordRepository.findWordsToLearn(wordBookId);
   }
 

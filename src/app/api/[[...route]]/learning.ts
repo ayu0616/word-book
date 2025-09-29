@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { z } from "zod";
 import { LearningRecordService } from "@/application/learningRecord/service";
+import { WordId } from "@/domain/word/value-objects/WordId";
 import { DrizzleLearningRecordRepository } from "@/infrastructure/learningRecord/repository.drizzle";
 import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
 
@@ -26,7 +27,7 @@ export const LearningController = new Hono()
       const { wordBookId } = c.req.valid("param");
       const wordsToLearn =
         await learningRecordService.getWordsToLearn(wordBookId);
-      return c.json(wordsToLearn);
+      return c.json(wordsToLearn.map((w) => w.toJson()));
     },
   )
   .get(
@@ -49,16 +50,16 @@ export const LearningController = new Hono()
     zValidator(
       "json",
       z.object({
-        wordId: z.number(),
+        wordId: z.cuid2(),
         result: z.enum(["correct", "incorrect"]),
       }),
     ),
     async (c) => {
       const { wordId, result } = c.req.valid("json");
-      await learningRecordService.recordLearningResult({
-        wordId,
-        result,
-      });
+      await learningRecordService.recordLearningResult(
+        WordId.from(wordId), // WordId型に変換
+        result === "correct",
+      );
       return c.json({ message: "Learning record updated" });
     },
   );

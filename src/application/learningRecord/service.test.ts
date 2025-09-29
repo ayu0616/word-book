@@ -1,76 +1,76 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import type { WordRepository } from "@/application/word/ports";
-import type { words } from "@/db/schema";
-import { Word } from "@/domain/word/entities";
+import { createId } from "@paralleldrive/cuid2";
+import { describe, expect, it, vi } from "vitest";
+import { Word, type WordProps } from "@/domain/word/entities";
+import { WordBookId } from "@/domain/word/value-objects/WordBookId";
+import { WordId } from "@/domain/word/value-objects/WordId";
+import type { WordRepository } from "../word/ports";
 import type { LearningRecordRepository } from "./ports";
 import { LearningRecordService } from "./service";
 
 // Mock WordRepository
 class InMemoryWordRepository implements WordRepository {
-  private words: (typeof words.$inferSelect)[] = [];
+  private words: WordProps[] = [];
 
   async createWord(word: Word): Promise<Word> {
     const newWord = {
-      id: this.words.length + 1,
-      wordBookId: word.wordBookId,
-      term: word.term,
-      meaning: word.meaning,
-      createdAt: word.createdAt,
-      consecutiveCorrectCount: word.consecutiveCorrectCount,
-      nextReviewDate: word.nextReviewDate,
+      id: createId(),
+      wordBookId: word.wordBookId.value,
+      term: word.term.value,
+      meaning: word.meaning.value,
+      createdAt: word.createdAt.value,
+      consecutiveCorrectCount: word.consecutiveCorrectCount.value,
+      nextReviewDate: word.nextReviewDate.value,
     };
     this.words.push(newWord);
     return Word.fromPersistence(newWord);
   }
 
-  async findById(id: number): Promise<Word | undefined> {
-    const foundWord = this.words.find((word) => word.id === id);
+  async findById(id: WordId): Promise<Word | undefined> {
+    const foundWord = this.words.find((word) => word.id === id.value);
     return foundWord ? Word.fromPersistence(foundWord) : undefined;
   }
 
-  async findWordsByWordBookId(wordBookId: number): Promise<Word[]> {
+  async findWordsByWordBookId(wordBookId: WordBookId): Promise<Word[]> {
     return this.words
-      .filter((word) => word.wordBookId === wordBookId)
+      .filter((word) => word.wordBookId === wordBookId.value)
       .map((w) => Word.fromPersistence(w));
   }
 
   async update(word: Word): Promise<void> {
-    const index = this.words.findIndex((w) => w.id === word.id);
+    const index = this.words.findIndex((w) => w.id === word.id.value);
     if (index !== -1) {
       this.words[index] = {
         ...this.words[index],
-        term: word.term,
-        meaning: word.meaning,
-        consecutiveCorrectCount: word.consecutiveCorrectCount,
-        nextReviewDate: word.nextReviewDate,
+        term: word.term.value,
+        meaning: word.meaning.value,
+        consecutiveCorrectCount: word.consecutiveCorrectCount.value,
+        nextReviewDate: word.nextReviewDate.value,
       };
     }
   }
 
   // Helper to add words for testing
-  addWord(word: typeof words.$inferSelect) {
+  addWord(word: WordProps) {
     this.words.push(word);
   }
 
   // Helper to update words for testing
-  updateWord(word: typeof words.$inferSelect) {
+  updateWord(word: WordProps) {
     const index = this.words.findIndex((w) => w.id === word.id);
     if (index !== -1) {
       this.words[index] = word;
     }
   }
 
-  async delete(id: number): Promise<void> {
-    this.words = this.words.filter((word) => word.id !== id);
+  async delete(id: WordId): Promise<void> {
+    this.words = this.words.filter((word) => word.id !== id.value);
   }
 }
 
 class InMemoryLearningRecordRepository implements LearningRecordRepository {
-  private words: (typeof words.$inferSelect)[] = [];
+  private words: WordProps[] = [];
 
-  async findWordsToLearn(
-    wordBookId: number,
-  ): Promise<(typeof words.$inferSelect)[]> {
+  async findWordsToLearn(wordBookId: number): Promise<Word[]> {
     const now = new Date();
     const filteredWords = this.words.filter((word) => {
       const isDueForReview = word.nextReviewDate <= now;
@@ -84,19 +84,7 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
       );
     });
 
-    return filteredWords;
-  }
-
-  async updateWordLearningData(
-    wordId: number,
-    consecutiveCorrectCount: number,
-    nextReviewDate: Date,
-  ): Promise<void> {
-    const word = this.words.find((w) => w.id === wordId);
-    if (word) {
-      word.consecutiveCorrectCount = consecutiveCorrectCount;
-      word.nextReviewDate = nextReviewDate;
-    }
+    return filteredWords.map(Word.fromPersistence);
   }
 
   async countWordsToLearn(wordBookId: number): Promise<number> {
@@ -116,7 +104,7 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
   }
 
   // Helper to add words for testing
-  addWord(word: typeof words.$inferSelect) {
+  addWord(word: WordProps) {
     this.words.push(word);
   }
 }
@@ -137,63 +125,144 @@ describe("LearningRecordService", () => {
 
   describe("recordLearningResult", () => {
     it("should update an existing word with correct result", async () => {
-      const wordBookId = 1;
-      const wordId = 1;
-      const initialWord = {
-        id: wordId,
-        wordBookId: wordBookId,
+      const wordId = WordId.create();
+      const wordBookId = WordBookId.create(1);
+      const initialNextReviewDate = new Date();
+      initialNextReviewDate.setDate(initialNextReviewDate.getDate() - 1); // 昨日
+
+      const mockWord = Word.fromPersistence({
+        id: wordId.value,
+        wordBookId: wordBookId.value,
         term: "test",
         meaning: "テスト",
         createdAt: new Date(),
         consecutiveCorrectCount: 0,
-        nextReviewDate: new Date(),
-      };
-      wordRepository.addWord(initialWord);
-      learningRecordRepository.addWord(initialWord);
+        nextReviewDate: initialNextReviewDate,
+      });
 
-      await service.recordLearningResult({ wordId, result: "correct" });
+      const wordRepository: WordRepository = {
+        createWord: vi.fn(),
+        findWordsByWordBookId: vi.fn(),
+        findById: vi.fn(async (id: WordId) =>
+          id.value === wordId.value ? mockWord : undefined,
+        ),
+        update: vi
+          .fn(async (word: Word) => {
+            Object.assign(mockWord, word); // ここを再度追加
+            expect(word.id?.value).toBe(mockWord.id?.value);
+            expect(word.wordBookId.value).toBe(mockWord.wordBookId.value);
+            expect(word.term.value).toBe(mockWord.term.value);
+            expect(word.meaning.value).toBe(mockWord.meaning.value);
+            expect(word.createdAt.value).toEqual(mockWord.createdAt.value);
+            expect(word.consecutiveCorrectCount).toBe(1); // 期待される値
+            const expectedNextReviewDate1 = new Date();
+            expectedNextReviewDate1.setDate(
+              expectedNextReviewDate1.getDate() + 1,
+            );
+            expect(word.nextReviewDate.value.toDateString()).toBe(
+              expectedNextReviewDate1.toDateString(),
+            );
+          })
+          .mockResolvedValue(undefined),
+        delete: vi.fn(),
+      };
+
+      const learningRecordRepository: LearningRecordRepository = {
+        findWordsToLearn: vi.fn(),
+        countWordsToLearn: vi.fn(),
+      };
+
+      const service = new LearningRecordService(
+        learningRecordRepository,
+        wordRepository,
+      );
+
+      await service.recordLearningResult(wordId, true);
+
+      expect(wordRepository.findById).toHaveBeenCalledWith(wordId);
+      expect(wordRepository.update).toHaveBeenCalledOnce(); // updateが一度呼ばれたことを確認
 
       const updatedWord = await wordRepository.findById(wordId);
-      expect(updatedWord?.consecutiveCorrectCount).toBe(1);
+      expect(updatedWord?.consecutiveCorrectCount.value).toBe(1);
       const expectedNextReviewDate1 = new Date();
-      expectedNextReviewDate1.setDate(expectedNextReviewDate1.getDate() + 1); // 1日後に修正
-      expect(updatedWord?.nextReviewDate.toDateString()).toBe(
+      expectedNextReviewDate1.setDate(expectedNextReviewDate1.getDate() + 1); // 1日後
+      expect(updatedWord?.nextReviewDate.value.toDateString()).toBe(
         expectedNextReviewDate1.toDateString(),
-      ); // 1 day + 1 day for next review
+      );
     });
 
     it("should reset consecutive count and next review date on incorrect result", async () => {
-      const wordBookId = 1;
-      const wordId = 1;
-      const initialWord = {
-        id: wordId,
-        wordBookId: wordBookId,
+      const wordId = WordId.create();
+      const wordBookId = WordBookId.create(1);
+      const initialNextReviewDate = new Date();
+      initialNextReviewDate.setDate(initialNextReviewDate.getDate() - 1); // 昨日
+
+      const mockWord = Word.fromPersistence({
+        id: wordId.value,
+        wordBookId: wordBookId.value,
         term: "test",
         meaning: "テスト",
         createdAt: new Date(),
         consecutiveCorrectCount: 2,
-        nextReviewDate: new Date(new Date().getDate() + 4),
-      };
-      wordRepository.addWord(initialWord);
-      learningRecordRepository.addWord(initialWord);
+        nextReviewDate: initialNextReviewDate,
+      });
 
-      await service.recordLearningResult({ wordId, result: "incorrect" });
+      const wordRepository: WordRepository = {
+        createWord: vi.fn(),
+        findWordsByWordBookId: vi.fn(),
+        findById: vi.fn(async (id: WordId) =>
+          id.value === wordId.value ? mockWord : undefined,
+        ),
+        update: vi
+          .fn(async (word: Word) => {
+            Object.assign(mockWord, word); // ここを再度追加
+            expect(word.id?.value).toBe(mockWord.id?.value);
+            expect(word.wordBookId.value).toBe(mockWord.wordBookId.value);
+            expect(word.term.value).toBe(mockWord.term.value);
+            expect(word.meaning.value).toBe(mockWord.meaning.value);
+            expect(word.createdAt.value).toEqual(mockWord.createdAt.value);
+            expect(word.consecutiveCorrectCount).toBe(0); // 期待される値
+            const expectedNextReviewDate2 = new Date();
+            expectedNextReviewDate2.setDate(
+              expectedNextReviewDate2.getDate() + 1,
+            );
+            expect(word.nextReviewDate.value.toDateString()).toBe(
+              expectedNextReviewDate2.toDateString(),
+            );
+          })
+          .mockResolvedValue(undefined),
+        delete: vi.fn(),
+      };
+
+      const learningRecordRepository: LearningRecordRepository = {
+        findWordsToLearn: vi.fn(),
+        countWordsToLearn: vi.fn(),
+      };
+
+      const service = new LearningRecordService(
+        learningRecordRepository,
+        wordRepository,
+      );
+
+      await service.recordLearningResult(wordId, false);
+
+      expect(wordRepository.findById).toHaveBeenCalledWith(wordId);
+      expect(wordRepository.update).toHaveBeenCalledOnce(); // updateが一度呼ばれたことを確認
 
       const updatedWord = await wordRepository.findById(wordId);
       expect(updatedWord?.consecutiveCorrectCount).toBe(0);
       const expectedNextReviewDate2 = new Date();
-      expectedNextReviewDate2.setDate(expectedNextReviewDate2.getDate() + 0); // 0日後に修正
-      expect(updatedWord?.nextReviewDate.toDateString()).toBe(
+      expect(updatedWord?.nextReviewDate.value.toDateString()).toBe(
         expectedNextReviewDate2.toDateString(),
-      ); // 1 day from now
+      );
     });
   });
 
   describe("getWordsToLearn", () => {
     it("should return words to learn based on next review date", async () => {
       const wordBookId = 1;
-      const wordId1 = 101;
-      const wordId2 = 102;
+      const wordId1 = createId();
+      const wordId2 = createId();
 
       const word1 = {
         id: wordId1,
@@ -222,12 +291,12 @@ describe("LearningRecordService", () => {
       const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(2);
-      expect(wordsToLearn[0].id).toBe(wordId1);
+      expect(wordsToLearn[0].id.value).toBe(wordId1);
     });
 
     it("should not return mastered words", async () => {
       const wordBookId = 1;
-      const wordId = 103;
+      const wordId = createId();
 
       const masteredWord = {
         id: wordId,
@@ -248,7 +317,7 @@ describe("LearningRecordService", () => {
 
     it("should return words with no learning records (initial learning)", async () => {
       const wordBookId = 1;
-      const wordId = 104;
+      const wordId = createId();
 
       const newWord = {
         id: wordId,
@@ -266,16 +335,16 @@ describe("LearningRecordService", () => {
       const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(1);
-      expect(wordsToLearn[0].id).toBe(wordId);
+      expect(wordsToLearn[0].id.value).toBe(wordId);
     });
   });
 
   describe("countWordsToLearn", () => {
     it("should return the correct count of words to learn", async () => {
       const wordBookId = 1;
-      const wordId1 = 101;
-      const wordId2 = 102;
-      const wordId3 = 103;
+      const wordId1 = createId();
+      const wordId2 = createId();
+      const wordId3 = createId();
 
       const word1 = {
         id: wordId1,
@@ -315,7 +384,7 @@ describe("LearningRecordService", () => {
 
     it("should return 0 if no words are due for learning", async () => {
       const wordBookId = 1;
-      const wordId1 = 101;
+      const wordId1 = createId();
 
       const word1 = {
         id: wordId1,
@@ -335,7 +404,7 @@ describe("LearningRecordService", () => {
 
     it("should return 0 if all words are mastered", async () => {
       const wordBookId = 1;
-      const wordId1 = 101;
+      const wordId1 = createId();
 
       const word1 = {
         id: wordId1,

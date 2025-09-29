@@ -1,11 +1,6 @@
-import type { words } from "@/db/schema";
+import type { Word } from "@/domain/word/entities";
 
 export interface LearningRecordRepository {
-  findWordsToLearn(wordBookId: number): Promise<(typeof words.$inferSelect)[]>;
-  updateWordLearningData(
-    wordId: number,
-    consecutiveCorrectCount: number,
-    nextReviewDate: Date,
-  ): Promise<void>;
+  findWordsToLearn(wordBookId: number): Promise<Word[]>;
   countWordsToLearn(wordBookId: number): Promise<number>;
 }

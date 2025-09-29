@@ -1,13 +1,6 @@
-import type { words } from "@/db/schema";
+import type { WordProps } from "@/domain/word/entities";
 import { getServerClient } from "@/lib/hono-server";
 import { LearnContent } from "./LearnContent";
-
-type WordSelect = typeof words.$inferSelect;
-
-type RawWordApiResponse = Omit<WordSelect, "createdAt" | "nextReviewDate"> & {
-  createdAt: string;
-  nextReviewDate: string;
-};
 
 export default async function LearnPage({
   params,
@@ -23,8 +16,8 @@ export default async function LearnPage({
     throw new Error("学習の取得に失敗しました");
   }
 
-  const words: WordSelect[] = ((await res.json()) as RawWordApiResponse[])
-    .map((word: RawWordApiResponse) => ({
+  const words: WordProps[] = (await res.json())
+    .map((word) => ({
       ...word,
       createdAt: new Date(word.createdAt),
       nextReviewDate: new Date(word.nextReviewDate),

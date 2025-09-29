@@ -1,11 +1,19 @@
-import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+  vitest,
+} from "vitest";
 import { db } from "@/db";
 import { wordBooks } from "@/db/schema";
 import { WordBook } from "@/domain/wordBook/entities";
 import { DrizzleWordBookRepository } from "./repository.drizzle";
 
 // Mock the db object
-vi.mock("@/db", () => ({
+vitest.mock("@/db", () => ({
   db: {
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
@@ -29,7 +37,7 @@ vi.mock("@/db", () => ({
 }));
 
 // Mock drizzle-orm functions
-vi.mock("drizzle-orm", async (importOriginal) => {
+vitest.mock("drizzle-orm", async (importOriginal) => {
   const mod = await importOriginal<typeof import("drizzle-orm")>();
   return {
     ...mod,
@@ -38,7 +46,7 @@ vi.mock("drizzle-orm", async (importOriginal) => {
 });
 
 // Mock WordBook entity
-vi.mock("@/domain/wordBook/entities", () => ({
+vitest.mock("@/domain/wordBook/entities", () => ({
   WordBook: {
     fromPersistence: vi.fn((data) => ({
       id: data.id,

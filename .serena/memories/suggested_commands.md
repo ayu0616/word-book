@@ -8,8 +8,7 @@
 - **Generate DB Migrations:** `bun db:generate` (or `npm run db:generate`, `yarn db:generate`, `pnpm db:generate`)
 - **Run DB Migrations:** `bun db:migrate` (or `npm run db:migrate`, `yarn db:migrate`, `pnpm db:migrate`)
 - **Type Check:** `bun typecheck` (or `npm run typecheck`, `yarn typecheck`, `pnpm typecheck`)
-- **Run Tests:** `bun test` (or `npm run test`, `yarn test`, `pnpm test`)
-- **Run Tests in Watch Mode:** `bun test:watch` (or `npm run test:watch`, `yarn test:watch`, `pnpm test:watch`)
+- **Run Tests:** `bun run test` (or `npm run test`, `yarn test`, `pnpm test`)
 - **Setup Git Hooks:** `bun prepare` (or `npm run prepare`, `yarn prepare`, `pnpm prepare`)
 
 ## Git Commands
