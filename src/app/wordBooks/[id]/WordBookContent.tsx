@@ -58,7 +58,7 @@ export default function WordBookContent({
   };
 
   const handleSaveWord = (updatedWord: {
-    id: number;
+    id: string;
     term: string;
     meaning: string;
   }) => {
@@ -76,7 +76,7 @@ export default function WordBookContent({
     setEditingWord(null);
   };
 
-  const handleDeleteClick = useCallback(async (wordId: number) => {
+  const handleDeleteClick = useCallback(async (wordId: string) => {
     if (!confirm("Are you sure you want to delete this word?")) {
       return;
     }

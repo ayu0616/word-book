@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it } from "vitest";
 import { Word } from "./entities";
 import { CreatedAt } from "./value-objects/CreatedAt";
@@ -16,7 +17,7 @@ describe("Word", () => {
     const word = Word.create({ wordBookId, term, meaning });
 
     expect(word).toBeInstanceOf(Word);
-    expect(word.id).toEqual(expect.any(WordId));
+    expect(word.id).toBeInstanceOf(WordId);
     expect(word.wordBookId).toEqual(wordBookId);
     expect(word.term).toEqual(term);
     expect(word.meaning).toEqual(meaning);
@@ -27,8 +28,9 @@ describe("Word", () => {
 
   it("永続化データからWordインスタンスを生成できる", () => {
     const now = new Date();
+    const wordId = createId();
     const word = Word.fromPersistence({
-      id: 100,
+      id: wordId,
       wordBookId: 1,
       term: "persisted",
       meaning: "永続化された",
@@ -39,7 +41,7 @@ describe("Word", () => {
 
     expect(word).toBeInstanceOf(Word);
     expect(word.id).toBeInstanceOf(WordId);
-    expect(word.id?.value).toBe(100);
+    expect(word.id?.value).toBe(wordId);
     expect(word.wordBookId).toBeInstanceOf(WordBookId);
     expect(word.wordBookId.value).toBe(1);
     expect(word.term).toBeInstanceOf(Term);
@@ -61,7 +63,7 @@ describe("Word", () => {
 
     // fromPersistenceの引数はプリミティブ型で渡す
     const word = Word.fromPersistence({
-      id: 1,
+      id: createId(),
       wordBookId: 1,
       term: "test",
       meaning: "テスト",
@@ -97,7 +99,7 @@ describe("Word", () => {
 
     // fromPersistenceの引数はプリミティブ型で渡す
     const word = Word.fromPersistence({
-      id: 1,
+      id: createId(),
       wordBookId: 1,
       term: "test",
       meaning: "テスト",

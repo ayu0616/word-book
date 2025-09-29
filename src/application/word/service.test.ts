@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it, vi } from "vitest";
 import { Word } from "@/domain/word/entities";
 import { Meaning } from "@/domain/word/value-objects/Meaning";
@@ -9,12 +10,14 @@ import { WordService } from "./service";
 
 describe("WordService", () => {
   it("should create a word", async () => {
+    const id1 = createId();
+    const id2 = createId();
     const mockWordRepository: WordRepository = {
       createWord: vi.fn(async (word: Word) => word),
       findById: vi.fn(async (id: WordId) => {
-        if (id.value === 1) {
+        if (id.value === id1) {
           return Word.fromPersistence({
-            id: 1,
+            id: id1,
             wordBookId: 1,
             term: "Word 1",
             meaning: "Meaning 1",
@@ -27,7 +30,7 @@ describe("WordService", () => {
       }),
       findWordsByWordBookId: vi.fn(async (wordBookId: WordBookId) => [
         Word.fromPersistence({
-          id: 1,
+          id: id1,
           wordBookId: wordBookId.value,
           term: "Word 1",
           meaning: "Meaning 1",
@@ -36,7 +39,7 @@ describe("WordService", () => {
           nextReviewDate: new Date(),
         }),
         Word.fromPersistence({
-          id: 2,
+          id: id2,
           wordBookId: wordBookId.value,
           term: "Word 2",
           meaning: "Meaning 2",
@@ -72,12 +75,13 @@ describe("WordService", () => {
   });
 
   it("should update a word", async () => {
+    const id1 = createId();
     const mockWordRepository: WordRepository = {
       createWord: vi.fn(async (word: Word) => word),
       findById: vi.fn(async (id: WordId) => {
-        if (id.value === 1) {
+        if (id.value === id1) {
           return Word.fromPersistence({
-            id: 1,
+            id: id1,
             wordBookId: 1,
             term: "Old Term",
             meaning: "Old Meaning",
@@ -95,7 +99,7 @@ describe("WordService", () => {
     const service = new WordService(mockWordRepository);
 
     const input = {
-      id: WordId.create(1),
+      id: WordId.from(id1),
       term: Term.create("New Term"),
       meaning: Meaning.create("New Meaning"),
     };
@@ -116,12 +120,13 @@ describe("WordService", () => {
   });
 
   it("should find words by word book ID", async () => {
+    const id1 = createId();
     const mockWordRepository: WordRepository = {
       createWord: vi.fn(async (word: Word) => word),
       findById: vi.fn(async (_id: WordId) => undefined),
       findWordsByWordBookId: vi.fn(async (wordBookId: WordBookId) => [
         Word.fromPersistence({
-          id: 1,
+          id: id1,
           wordBookId: wordBookId.value,
           term: "Word 1",
           meaning: "Meaning 1",
@@ -146,12 +151,13 @@ describe("WordService", () => {
   });
 
   it("should find a word by ID", async () => {
+    const id1 = createId();
     const mockWordRepository: WordRepository = {
       createWord: vi.fn(async (word: Word) => word),
       findById: vi.fn(async (id: WordId) => {
-        if (id.value === 1) {
+        if (id.value === id1) {
           return Word.fromPersistence({
-            id: 1,
+            id: id1,
             wordBookId: 1,
             term: "Found Word",
             meaning: "Found Meaning",
@@ -168,7 +174,7 @@ describe("WordService", () => {
     };
     const service = new WordService(mockWordRepository);
 
-    const wordId = WordId.create(1);
+    const wordId = WordId.from(id1);
     const foundWord = await service.findById(wordId);
 
     expect(mockWordRepository.findById).toHaveBeenCalledWith(wordId);
@@ -186,7 +192,7 @@ describe("WordService", () => {
     };
     const service = new WordService(mockWordRepository);
 
-    const wordId = WordId.create(999);
+    const wordId = WordId.from(createId());
     const foundWord = await service.findById(wordId);
 
     expect(mockWordRepository.findById).toHaveBeenCalledWith(wordId);
@@ -203,7 +209,7 @@ describe("WordService", () => {
     };
     const service = new WordService(mockWordRepository);
 
-    const wordId = WordId.create(1);
+    const wordId = WordId.create();
     await service.deleteWord(wordId);
 
     expect(mockWordRepository.delete).toHaveBeenCalledWith(wordId);

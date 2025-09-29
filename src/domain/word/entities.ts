@@ -6,7 +6,7 @@ import { WordBookId } from "./value-objects/WordBookId";
 import { WordId } from "./value-objects/WordId";
 
 export interface WordProps {
-  id: number;
+  id: string;
   wordBookId: number;
   term: string;
   meaning: string;
@@ -48,7 +48,7 @@ export class Word {
     meaning: Meaning;
   }): Word {
     return new Word(
-      WordId.create(1),
+      WordId.create(),
       props.wordBookId,
       props.term,
       props.meaning,
@@ -58,17 +58,9 @@ export class Word {
     );
   }
 
-  static fromPersistence(props: {
-    id: number;
-    wordBookId: number;
-    term: string;
-    meaning: string;
-    createdAt: Date;
-    consecutiveCorrectCount: number;
-    nextReviewDate: Date;
-  }): Word {
+  static fromPersistence(props: WordProps): Word {
     return new Word(
-      WordId.create(props.id),
+      WordId.from(props.id),
       WordBookId.create(props.wordBookId),
       Term.create(props.term),
       Meaning.create(props.meaning),

@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import { eq, isNull, lt, or } from "drizzle-orm";
 import {
   beforeEach,
@@ -82,7 +83,7 @@ describe("DrizzleLearningRecordRepository", () => {
 
   describe("updateWordLearningData", () => {
     it("should update the learning data for a given word", async () => {
-      const mockWordId = 1;
+      const mockWordId = createId();
       const mockConsecutiveCorrectCount = 3;
       const mockNextReviewDate = new Date();
 
@@ -93,7 +94,7 @@ describe("DrizzleLearningRecordRepository", () => {
       });
 
       await repository.updateWordLearningData(
-        WordId.create(mockWordId),
+        WordId.from(mockWordId),
         mockConsecutiveCorrectCount,
         NextReviewDate.create(mockNextReviewDate),
       );

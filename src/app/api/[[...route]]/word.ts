@@ -122,7 +122,7 @@ export const WordController = new Hono()
     zValidator(
       "param",
       z.object({
-        id: z.string().transform(Number),
+        id: z.cuid2(),
       }),
     ),
     zValidator(
@@ -146,7 +146,7 @@ export const WordController = new Hono()
       const { id } = c.req.valid("param");
       const { term, meaning } = c.req.valid("json");
 
-      const existingWord = await wordService.findById(WordId.create(id));
+      const existingWord = await wordService.findById(WordId.from(id));
       if (!existingWord) {
         return c.json({ ok: false, error: "word_not_found" }, 404);
       }
@@ -159,7 +159,7 @@ export const WordController = new Hono()
       }
 
       const updatedWord = await wordService.updateWord({
-        id: WordId.create(id),
+        id: WordId.from(id),
         term: Term.create(term),
         meaning: Meaning.create(meaning),
       });
@@ -185,7 +185,7 @@ export const WordController = new Hono()
     zValidator(
       "param",
       z.object({
-        id: z.string().transform(Number),
+        id: z.cuid2(),
       }),
     ),
     async (c) => {
@@ -201,7 +201,7 @@ export const WordController = new Hono()
 
       const { id } = c.req.valid("param");
 
-      const existingWord = await wordService.findById(WordId.create(id));
+      const existingWord = await wordService.findById(WordId.from(id));
       if (!existingWord) {
         return c.json({ ok: false, error: "word_not_found" }, 404);
       }
@@ -213,7 +213,7 @@ export const WordController = new Hono()
         return c.json({ ok: false, error: "unauthorized" }, 401);
       }
 
-      await wordService.deleteWord(WordId.create(id));
+      await wordService.deleteWord(WordId.from(id));
       return c.json({ ok: true, message: "Word deleted successfully" }, 200);
     },
   )

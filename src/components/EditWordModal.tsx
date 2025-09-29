@@ -28,7 +28,7 @@ interface EditWordModalProps {
   isOpen: boolean;
   onClose: () => void;
   word: WordProps;
-  onSave: (updatedWord: { id: number; term: string; meaning: string }) => void;
+  onSave: (updatedWord: { id: string; term: string; meaning: string }) => void;
 }
 
 const formSchema = z.object({
@@ -61,7 +61,6 @@ export function EditWordModal({
           id: word.id?.toString() ?? "",
         },
       });
-          id: word.id.toString(),
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error ?? "単語の更新に失敗しました。");

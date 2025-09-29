@@ -11,6 +11,7 @@ export class DrizzleWordRepository implements WordRepository {
     const [newWord] = await db
       .insert(words)
       .values({
+        id: word.id.value,
         wordBookId: word.wordBookId.value,
         term: word.term.value,
         meaning: word.meaning.value,

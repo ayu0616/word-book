@@ -1,14 +1,13 @@
-import { ValueObject } from "../../../lib/value-object";
+import { Cuid } from "@/domain/common/cuid";
 
-export class WordId extends ValueObject<number> {
-  protected constructor(value: number) {
-    super(value);
+export class WordId extends Cuid {
+  static from(id: string): WordId {
+    const parsed = Cuid.from(id);
+    return new WordId(parsed.value);
   }
 
-  static create(id: number): WordId {
-    if (id <= 0) {
-      throw new Error("WordId must be a positive number.");
-    }
-    return new WordId(id);
+  static create(): WordId {
+    const created = Cuid.create();
+    return new WordId(created.value);
   }
 }
