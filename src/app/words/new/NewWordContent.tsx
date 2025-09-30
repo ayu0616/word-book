@@ -23,28 +23,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { WordBookProps } from "@/domain/wordBook/word-book.entity";
 import { client } from "@/lib/hono";
 
 const formSchema = z.object({
-  wordBookId: z
-    .number({ message: "単語帳を選択してください。" })
-    .min(1, { message: "単語帳を選択してください。" }),
+  wordBookId: z.cuid2({
+    message: "単語帳を選択してください。",
+  }),
   term: z.string().min(1, { message: "単語を入力してください。" }).max(255),
   meaning: z.string().min(1, { message: "意味を入力してください。" }),
 });
 
 type WordFormValues = z.infer<typeof formSchema>;
 
-interface WordBook {
-  id: number;
-  userId: number;
-  title: string;
-}
-
 export default function NewWordContent({
   wordBooks,
 }: {
-  wordBooks: WordBook[];
+  wordBooks: WordBookProps[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);

@@ -22,20 +22,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import type { WordProps } from "@/domain/word/entities";
+import type { WordBookProps } from "@/domain/wordBook/word-book.entity";
 import { client } from "@/lib/hono";
-
-interface WordBook {
-  id: number;
-  userId: number;
-  title: string;
-}
 
 export default function WordBookContent({
   wordBook: initialWordBook,
   words: initialWords,
   wordsToLearnCount,
 }: {
-  wordBook: WordBook;
+  wordBook: WordBookProps;
   words: WordProps[];
   wordsToLearnCount: number;
 }) {

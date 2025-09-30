@@ -20,7 +20,7 @@ export const LearningController = new Hono()
     zValidator(
       "param",
       z.object({
-        wordBookId: z.string().transform(Number),
+        wordBookId: z.cuid2(),
       }),
     ),
     async (c) => {
@@ -35,7 +35,7 @@ export const LearningController = new Hono()
     zValidator(
       "param",
       z.object({
-        wordBookId: z.string().transform(Number),
+        wordBookId: z.cuid2(),
       }),
     ),
     async (c) => {

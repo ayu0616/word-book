@@ -14,7 +14,7 @@ export const users = pgTable("users", (t) => ({
 }));
 
 export const wordBooks = pgTable("word_books", (t) => ({
-  id: t.serial("id").primaryKey(),
+  id: t.char("id", { length: 24 }).primaryKey(),
   userId: t
     .serial("user_id")
     .references(() => users.id)
@@ -25,8 +25,8 @@ export const wordBooks = pgTable("word_books", (t) => ({
 export const words = pgTable("words", (t) => ({
   id: t.char("id", { length: 24 }).primaryKey(),
   wordBookId: t
-    .serial("word_book_id")
-    .references(() => wordBooks.id)
+    .char("word_book_id", { length: 24 })
+    .references(() => wordBooks.id, { onDelete: "cascade" })
     .notNull(),
   term: t.varchar("term", { length: 255 }).notNull(),
   meaning: t.text("meaning").notNull(),

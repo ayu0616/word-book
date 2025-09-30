@@ -1,6 +1,7 @@
 import type { WordRepository } from "@/application/word/ports";
 import type { Word } from "@/domain/word/entities";
 import type { WordId } from "@/domain/word/value-objects/WordId";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import type { LearningRecordRepository } from "./ports";
 
 export class LearningRecordService {
@@ -28,11 +29,15 @@ export class LearningRecordService {
     return this.wordRepository.update(word);
   }
 
-  async getWordsToLearn(wordBookId: number): Promise<Word[]> {
-    return this.learningRecordRepository.findWordsToLearn(wordBookId);
+  async getWordsToLearn(wordBookId: string): Promise<Word[]> {
+    return this.learningRecordRepository.findWordsToLearn(
+      WordBookId.from(wordBookId),
+    );
   }
 
-  async countWordsToLearn(wordBookId: number): Promise<number> {
-    return this.learningRecordRepository.countWordsToLearn(wordBookId);
+  async countWordsToLearn(wordBookId: string): Promise<number> {
+    return this.learningRecordRepository.countWordsToLearn(
+      WordBookId.from(wordBookId),
+    );
   }
 }

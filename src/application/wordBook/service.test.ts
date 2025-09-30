@@ -1,5 +1,8 @@
+import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it, vi } from "vitest";
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
+import { WordBookTitle } from "@/domain/wordBook/value-objects/word-book-title";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 import type { WordBookRepository } from "./ports";
 import { WordBookService } from "./service";
 
@@ -9,8 +12,8 @@ describe("WordBookService", () => {
       create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async () => []),
       findWordBookById: vi.fn(async () => null),
-      delete: vi.fn(async (_id: number) => {}),
-      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
+      delete: vi.fn(async (_id: string) => {}),
+      updateTitle: vi.fn(async (_id: string, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -23,25 +26,27 @@ describe("WordBookService", () => {
 
     expect(mockWordBookRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        id: expect.any(WordBookId),
         userId: input.userId,
-        title: input.title,
+        title: WordBookTitle.from(input.title),
       }),
     );
     expect(createdWordBook).toBeInstanceOf(WordBook);
     expect(createdWordBook.userId).toBe(input.userId);
-    expect(createdWordBook.title).toBe(input.title);
+    expect(createdWordBook.title).toBeInstanceOf(WordBookTitle);
+    expect(createdWordBook.title.value).toBe(input.title);
   });
 
   it("should find word books by user ID", async () => {
     const mockWordBookRepository: WordBookRepository = {
       create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async (userId: number) => [
-        WordBook.fromPersistence({ id: 1, userId, title: "Book 1" }),
-        WordBook.fromPersistence({ id: 2, userId, title: "Book 2" }),
+        WordBook.fromPersistence({ id: createId(), userId, title: "Book 1" }),
+        WordBook.fromPersistence({ id: createId(), userId, title: "Book 2" }),
       ]),
       findWordBookById: vi.fn(async () => null),
-      delete: vi.fn(async (_id: number) => {}),
-      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
+      delete: vi.fn(async (_id: string) => {}),
+      updateTitle: vi.fn(async (_id: string, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
@@ -61,12 +66,12 @@ describe("WordBookService", () => {
       create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async () => []),
       findWordBookById: vi.fn(async () => null),
-      delete: vi.fn(async (_id: number) => {}),
-      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
+      delete: vi.fn(async (_id: string) => {}),
+      updateTitle: vi.fn(async (_id: string, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
-    const wordBookId = 1;
+    const wordBookId = createId();
     await service.deleteWordBook(wordBookId);
 
     expect(mockWordBookRepository.delete).toHaveBeenCalledWith(wordBookId);
@@ -76,22 +81,22 @@ describe("WordBookService", () => {
     const mockWordBookRepository: WordBookRepository = {
       create: vi.fn(async (wordBook: WordBook) => wordBook),
       findWordBooksByUserId: vi.fn(async () => []),
-      findWordBookById: vi.fn(async (id: number) => {
-        if (id === 1) {
+      findWordBookById: vi.fn(async (id: string) => {
+        if (id === wordBookId) {
           return WordBook.fromPersistence({
-            id: 1,
+            id: createId(),
             userId: 1,
             title: "Old Title",
           });
         }
         return null;
       }),
-      delete: vi.fn(async (_id: number) => {}),
-      updateTitle: vi.fn(async (_id: number, _title: string) => {}),
+      delete: vi.fn(async (_id: string) => {}),
+      updateTitle: vi.fn(async (_id: string, _title: string) => {}),
     };
     const service = new WordBookService(mockWordBookRepository);
 
-    const wordBookId = 1;
+    const wordBookId = createId();
     const newTitle = "New Title";
     await service.updateWordBookTitle(wordBookId, newTitle);
 

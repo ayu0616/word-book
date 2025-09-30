@@ -9,8 +9,14 @@ import {
 } from "vitest";
 import { db } from "@/db";
 import { wordBooks } from "@/db/schema";
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 import { DrizzleWordBookRepository } from "./repository.drizzle";
+
+// cuid2のサンプルID
+const cuid1 = "clv1abcd00001xyz123456789";
+const cuid2 = "clv1abcd00002xyz123456789";
+const cuid3 = "clv1abcd00003xyz123456789";
+const cuid4 = "clv1abcd00004xyz123456789";
 
 // Mock the db object
 vitest.mock("@/db", () => ({
@@ -46,10 +52,15 @@ vitest.mock("drizzle-orm", async (importOriginal) => {
 });
 
 // Mock WordBook entity
-vitest.mock("@/domain/wordBook/entities", () => ({
+vitest.mock("@/domain/wordBook/word-book.entity", () => ({
   WordBook: {
     fromPersistence: vi.fn((data) => ({
       id: data.id,
+      userId: data.userId,
+      title: data.title,
+    })),
+    create: vi.fn((data) => ({
+      id: cuid1,
       userId: data.userId,
       title: data.title,
     })),
@@ -66,13 +77,14 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("create", () => {
     it("should create and return a new WordBook", async () => {
-      const mockWordBook = {
+      const mockWordBook = WordBook.create({
         userId: 1,
         title: "Test WordBook",
-      };
+      });
       const mockNewWordBookRow = {
-        id: 1,
-        ...mockWordBook,
+        id: mockWordBook.id.value,
+        userId: mockWordBook.userId,
+        title: mockWordBook.title,
       };
 
       (db.insert as Mock).mockReturnValue({
@@ -80,12 +92,13 @@ describe("DrizzleWordBookRepository", () => {
         returning: vi.fn().mockResolvedValue([mockNewWordBookRow]),
       });
 
-      const result = await repository.create(mockWordBook as WordBook);
+      const result = await repository.create(mockWordBook);
 
       expect(db.insert).toHaveBeenCalledWith(wordBooks);
       expect((db.insert as Mock)().values).toHaveBeenCalledWith({
+        id: mockWordBook.id.value,
         userId: mockWordBook.userId,
-        title: mockWordBook.title,
+        title: mockWordBook.title.value,
       });
       expect(WordBook.fromPersistence).toHaveBeenCalledWith(mockNewWordBookRow);
       expect(result).toEqual(mockNewWordBookRow);
@@ -96,8 +109,8 @@ describe("DrizzleWordBookRepository", () => {
     it("should return an array of WordBooks for a given userId", async () => {
       const mockUserId = 1;
       const mockWordBookRows = [
-        { id: 1, userId: mockUserId, title: "WordBook 1" },
-        { id: 2, userId: mockUserId, title: "WordBook 2" },
+        { id: cuid1, userId: mockUserId, title: "WordBook 1" },
+        { id: cuid2, userId: mockUserId, title: "WordBook 2" },
       ];
 
       (db.select as Mock).mockReturnValue({
@@ -124,7 +137,7 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("findWordBookById", () => {
     it("should return a WordBook if found by ID", async () => {
-      const mockId = 1;
+      const mockId = cuid3;
       const mockWordBookRow = { id: mockId, userId: 1, title: "Test WordBook" };
 
       (db.select as Mock).mockReturnValue({
@@ -147,7 +160,7 @@ describe("DrizzleWordBookRepository", () => {
     });
 
     it("should return null if not found by ID", async () => {
-      const mockId = 999;
+      const mockId = "clv1notfound00000000000000";
 
       (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnThis(),
@@ -163,7 +176,7 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("delete", () => {
     it("should delete a word book by ID", async () => {
-      const mockId = 1;
+      const mockId = cuid4;
       const mockWhere = vi.fn();
       (db.delete as Mock).mockReturnValue({
         where: mockWhere,
@@ -183,7 +196,7 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("updateTitle", () => {
     it("should update the title of a word book", async () => {
-      const mockId = 1;
+      const mockId = cuid2;
       const mockTitle = "New Title";
       const mockWhere = vi.fn();
       (db.update as Mock).mockReturnValue({

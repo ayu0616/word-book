@@ -1,4 +1,4 @@
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 import type { WordBookRepository } from "./ports";
 
 export class WordBookService {
@@ -13,15 +13,15 @@ export class WordBookService {
     return this.repo.findWordBooksByUserId(userId);
   }
 
-  async findWordBookById(id: number): Promise<WordBook | null> {
+  async findWordBookById(id: string): Promise<WordBook | null> {
     return this.repo.findWordBookById(id);
   }
 
-  async deleteWordBook(id: number): Promise<void> {
+  async deleteWordBook(id: string): Promise<void> {
     await this.repo.delete(id);
   }
 
-  async updateWordBookTitle(id: number, title: string): Promise<void> {
+  async updateWordBookTitle(id: string, title: string): Promise<void> {
     await this.repo.updateTitle(id, title);
   }
 }

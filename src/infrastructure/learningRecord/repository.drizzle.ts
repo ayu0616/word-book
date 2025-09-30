@@ -5,17 +5,18 @@ import { words } from "@/db/schema";
 import { Word } from "@/domain/word/entities";
 import type { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate";
 import type { WordId } from "@/domain/word/value-objects/WordId";
+import type { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 
 export class DrizzleLearningRecordRepository
   implements LearningRecordRepository
 {
-  async findWordsToLearn(wordBookId: number): Promise<Word[]> {
+  async findWordsToLearn(wordBookId: WordBookId): Promise<Word[]> {
     const rows = await db
       .select()
       .from(words)
       .where(
         and(
-          eq(words.wordBookId, wordBookId),
+          eq(words.wordBookId, wordBookId.value),
           or(
             lt(words.nextReviewDate, new Date()),
             isNull(words.nextReviewDate),
@@ -40,13 +41,13 @@ export class DrizzleLearningRecordRepository
       .where(eq(words.id, wordId.value));
   }
 
-  async countWordsToLearn(wordBookId: number): Promise<number> {
+  async countWordsToLearn(wordBookId: WordBookId): Promise<number> {
     const [{ count: wordsToLearnCount }] = await db
       .select({ count: count() })
       .from(words)
       .where(
         and(
-          eq(words.wordBookId, wordBookId),
+          eq(words.wordBookId, wordBookId.value),
           or(
             lt(words.nextReviewDate, new Date()),
             isNull(words.nextReviewDate),

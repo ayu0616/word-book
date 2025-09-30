@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { Word } from "@/domain/word/entities";
 import { Meaning } from "@/domain/word/value-objects/Meaning";
 import { Term } from "@/domain/word/value-objects/Term";
-import { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import { WordId } from "@/domain/word/value-objects/WordId";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import type { WordRepository } from "./ports";
 import { WordService } from "./service";
 
@@ -18,7 +18,7 @@ describe("WordService", () => {
         if (id.value === id1) {
           return Word.fromPersistence({
             id: id1,
-            wordBookId: 1,
+            wordBookId: createId(),
             term: "Word 1",
             meaning: "Meaning 1",
             createdAt: new Date(),
@@ -54,7 +54,7 @@ describe("WordService", () => {
     const service = new WordService(mockWordRepository);
 
     const input = {
-      wordBookId: WordBookId.create(1),
+      wordBookId: WordBookId.from(createId()),
       term: Term.create("test term"),
       meaning: Meaning.create("test meaning"),
     };
@@ -82,7 +82,7 @@ describe("WordService", () => {
         if (id.value === id1) {
           return Word.fromPersistence({
             id: id1,
-            wordBookId: 1,
+            wordBookId: createId(),
             term: "Old Term",
             meaning: "Old Meaning",
             createdAt: new Date(),
@@ -140,7 +140,7 @@ describe("WordService", () => {
     };
     const service = new WordService(mockWordRepository);
 
-    const wordBookId = WordBookId.create(1);
+    const wordBookId = WordBookId.from(createId());
     const words = await service.findWordsByWordBookId(wordBookId);
 
     expect(mockWordRepository.findWordsByWordBookId).toHaveBeenCalledWith(
@@ -158,7 +158,7 @@ describe("WordService", () => {
         if (id.value === id1) {
           return Word.fromPersistence({
             id: id1,
-            wordBookId: 1,
+            wordBookId: createId(),
             term: "Found Word",
             meaning: "Found Meaning",
             createdAt: new Date(),
@@ -226,7 +226,7 @@ describe("WordService", () => {
       };
       const service = new WordService(mockWordRepository);
 
-      const wordBookId = WordBookId.create(1);
+      const wordBookId = WordBookId.from(createId());
       const csvContent = "term1,meaning1\nterm2,meaning2";
 
       const importedWords = await service.importWordsFromCsv(
@@ -263,7 +263,7 @@ describe("WordService", () => {
       };
       const service = new WordService(mockWordRepository);
 
-      const wordBookId = WordBookId.create(1);
+      const wordBookId = WordBookId.from(createId());
       const csvContent = "term1,meaning1\nmalformed_line\nterm2,meaning2,extra";
 
       const importedWords = await service.importWordsFromCsv(
