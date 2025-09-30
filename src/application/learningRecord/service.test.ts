@@ -291,7 +291,8 @@ describe("LearningRecordService", () => {
       const wordsToLearn = await service.getWordsToLearn(wordBookId);
 
       expect(wordsToLearn).toHaveLength(2);
-      expect(wordsToLearn[0].id.value).toBe(wordId1);
+      expect(wordsToLearn.map((w) => w.id.value)).toContain(wordId1);
+      expect(wordsToLearn.map((w) => w.id.value)).toContain(wordId2);
     });
 
     it("should not return mastered words", async () => {
