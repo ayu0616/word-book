@@ -1,5 +1,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it, vi } from "vitest";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
+import { WordBookTitle } from "@/domain/wordBook/value-objects/word-book-title";
 import { WordBook } from "@/domain/wordBook/word-book.entity";
 import type { WordBookRepository } from "./ports";
 import { WordBookService } from "./service";
@@ -24,13 +26,15 @@ describe("WordBookService", () => {
 
     expect(mockWordBookRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
+        id: expect.any(WordBookId),
         userId: input.userId,
-        title: input.title,
+        title: WordBookTitle.from(input.title),
       }),
     );
     expect(createdWordBook).toBeInstanceOf(WordBook);
     expect(createdWordBook.userId).toBe(input.userId);
-    expect(createdWordBook.title).toBe(input.title);
+    expect(createdWordBook.title).toBeInstanceOf(WordBookTitle);
+    expect(createdWordBook.title.value).toBe(input.title);
   });
 
   it("should find word books by user ID", async () => {

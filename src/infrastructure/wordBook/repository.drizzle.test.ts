@@ -59,6 +59,11 @@ vitest.mock("@/domain/wordBook/word-book.entity", () => ({
       userId: data.userId,
       title: data.title,
     })),
+    create: vi.fn((data) => ({
+      id: cuid1,
+      userId: data.userId,
+      title: data.title,
+    })),
   },
 }));
 
@@ -72,13 +77,12 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("create", () => {
     it("should create and return a new WordBook", async () => {
-      const mockWordBook = {
-        id: cuid1,
+      const mockWordBook = WordBook.create({
         userId: 1,
         title: "Test WordBook",
-      };
+      });
       const mockNewWordBookRow = {
-        id: cuid1,
+        id: mockWordBook.id.value,
         userId: mockWordBook.userId,
         title: mockWordBook.title,
       };
@@ -88,13 +92,13 @@ describe("DrizzleWordBookRepository", () => {
         returning: vi.fn().mockResolvedValue([mockNewWordBookRow]),
       });
 
-      const result = await repository.create(mockWordBook as WordBook);
+      const result = await repository.create(mockWordBook);
 
       expect(db.insert).toHaveBeenCalledWith(wordBooks);
       expect((db.insert as Mock)().values).toHaveBeenCalledWith({
-        id: mockWordBook.id,
+        id: mockWordBook.id.value,
         userId: mockWordBook.userId,
-        title: mockWordBook.title,
+        title: mockWordBook.title.value,
       });
       expect(WordBook.fromPersistence).toHaveBeenCalledWith(mockNewWordBookRow);
       expect(result).toEqual(mockNewWordBookRow);

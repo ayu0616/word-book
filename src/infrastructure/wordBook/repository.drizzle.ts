@@ -9,9 +9,9 @@ export class DrizzleWordBookRepository implements WordBookRepository {
     const [newWordBook] = await db
       .insert(wordBooks)
       .values({
-        id: wordBook.id,
+        id: wordBook.id.value,
         userId: wordBook.userId,
-        title: wordBook.title,
+        title: wordBook.title.value,
       })
       .returning();
     return WordBook.fromPersistence({
