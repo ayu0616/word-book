@@ -30,9 +30,10 @@ export class LearningRecordService {
   }
 
   async getWordsToLearn(wordBookId: string): Promise<Word[]> {
-    return this.learningRecordRepository.findWordsToLearn(
+    const words = this.learningRecordRepository.findWordsToLearn(
       WordBookId.from(wordBookId),
     );
+    return (await words).sort(() => Math.random() - 0.5);
   }
 
   async countWordsToLearn(wordBookId: string): Promise<number> {
