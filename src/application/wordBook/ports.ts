@@ -1,4 +1,4 @@
-import type { WordBook } from "@/domain/wordBook/entities";
+import type { WordBook } from "@/domain/wordBook/word-book.entity";
 
 export interface WordBookRepository {
   findWordBooksByUserId(userId: number): Promise<WordBook[]>;

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 import type { WordBookRepository } from "./ports";
 import { WordBookService } from "./service";
 

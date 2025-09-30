@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { db } from "@/db";
 import { wordBooks } from "@/db/schema";
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 import { DrizzleWordBookRepository } from "./repository.drizzle";
 
 // Mock the db object
@@ -46,7 +46,7 @@ vitest.mock("drizzle-orm", async (importOriginal) => {
 });
 
 // Mock WordBook entity
-vitest.mock("@/domain/wordBook/entities", () => ({
+vitest.mock("@/domain/wordBook/word-book.entity", () => ({
   WordBook: {
     fromPersistence: vi.fn((data) => ({
       id: data.id,

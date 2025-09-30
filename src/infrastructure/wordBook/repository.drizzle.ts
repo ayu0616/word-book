@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { WordBookRepository } from "@/application/wordBook/ports";
 import { db } from "@/db";
 import { wordBooks } from "@/db/schema";
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 
 export class DrizzleWordBookRepository implements WordBookRepository {
   async create(wordBook: WordBook): Promise<WordBook> {

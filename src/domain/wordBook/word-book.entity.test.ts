@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { WordBook } from "./entities";
+import { WordBook } from "./word-book.entity";
 
 describe("WordBook", () => {
   it("should create a new WordBook instance", () => {

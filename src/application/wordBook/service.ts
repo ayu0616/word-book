@@ -1,4 +1,4 @@
-import { WordBook } from "@/domain/wordBook/entities";
+import { WordBook } from "@/domain/wordBook/word-book.entity";
 import type { WordBookRepository } from "./ports";
 
 export class WordBookService {
