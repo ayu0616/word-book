@@ -1,8 +1,8 @@
 import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it, vi } from "vitest";
 import { Word, type WordProps } from "@/domain/word/entities";
-import { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import { WordId } from "@/domain/word/value-objects/WordId";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import type { WordRepository } from "../word/ports";
 import type { LearningRecordRepository } from "./ports";
 import { LearningRecordService } from "./service";
@@ -70,12 +70,12 @@ class InMemoryWordRepository implements WordRepository {
 class InMemoryLearningRecordRepository implements LearningRecordRepository {
   private words: WordProps[] = [];
 
-  async findWordsToLearn(wordBookId: number): Promise<Word[]> {
+  async findWordsToLearn(wordBookId: WordBookId): Promise<Word[]> {
     const now = new Date();
     const filteredWords = this.words.filter((word) => {
       const isDueForReview = word.nextReviewDate <= now;
       const isMastered = word.consecutiveCorrectCount >= 5;
-      const belongsToWordBook = word.wordBookId === wordBookId;
+      const belongsToWordBook = word.wordBookId === wordBookId.value;
 
       return (
         belongsToWordBook &&
@@ -87,12 +87,12 @@ class InMemoryLearningRecordRepository implements LearningRecordRepository {
     return filteredWords.map(Word.fromPersistence);
   }
 
-  async countWordsToLearn(wordBookId: number): Promise<number> {
+  async countWordsToLearn(wordBookId: WordBookId): Promise<number> {
     const now = new Date();
     const filteredWords = this.words.filter((word) => {
       const isDueForReview = word.nextReviewDate <= now;
       const isMastered = word.consecutiveCorrectCount >= 5;
-      const belongsToWordBook = word.wordBookId === wordBookId;
+      const belongsToWordBook = word.wordBookId === wordBookId.value;
 
       return (
         belongsToWordBook &&
@@ -126,7 +126,7 @@ describe("LearningRecordService", () => {
   describe("recordLearningResult", () => {
     it("should update an existing word with correct result", async () => {
       const wordId = WordId.create();
-      const wordBookId = WordBookId.create(1);
+      const wordBookId = WordBookId.from(createId());
       const initialNextReviewDate = new Date();
       initialNextReviewDate.setDate(initialNextReviewDate.getDate() - 1); // 昨日
 
@@ -193,7 +193,7 @@ describe("LearningRecordService", () => {
 
     it("should reset consecutive count and next review date on incorrect result", async () => {
       const wordId = WordId.create();
-      const wordBookId = WordBookId.create(1);
+      const wordBookId = WordBookId.from(createId());
       const initialNextReviewDate = new Date();
       initialNextReviewDate.setDate(initialNextReviewDate.getDate() - 1); // 昨日
 
@@ -260,7 +260,7 @@ describe("LearningRecordService", () => {
 
   describe("getWordsToLearn", () => {
     it("should return words to learn based on next review date", async () => {
-      const wordBookId = 1;
+      const wordBookId = createId();
       const wordId1 = createId();
       const wordId2 = createId();
 
@@ -295,7 +295,7 @@ describe("LearningRecordService", () => {
     });
 
     it("should not return mastered words", async () => {
-      const wordBookId = 1;
+      const wordBookId = createId();
       const wordId = createId();
 
       const masteredWord = {
@@ -316,7 +316,7 @@ describe("LearningRecordService", () => {
     });
 
     it("should return words with no learning records (initial learning)", async () => {
-      const wordBookId = 1;
+      const wordBookId = createId();
       const wordId = createId();
 
       const newWord = {
@@ -341,7 +341,7 @@ describe("LearningRecordService", () => {
 
   describe("countWordsToLearn", () => {
     it("should return the correct count of words to learn", async () => {
-      const wordBookId = 1;
+      const wordBookId = createId();
       const wordId1 = createId();
       const wordId2 = createId();
       const wordId3 = createId();
@@ -383,7 +383,7 @@ describe("LearningRecordService", () => {
     });
 
     it("should return 0 if no words are due for learning", async () => {
-      const wordBookId = 1;
+      const wordBookId = createId();
       const wordId1 = createId();
 
       const word1 = {
@@ -403,7 +403,7 @@ describe("LearningRecordService", () => {
     });
 
     it("should return 0 if all words are mastered", async () => {
-      const wordBookId = 1;
+      const wordBookId = createId();
       const wordId1 = createId();
 
       const word1 = {

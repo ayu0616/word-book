@@ -8,8 +8,8 @@ import { WordService } from "@/application/word/service";
 import { WordBookService } from "@/application/wordBook/service";
 import { Meaning } from "@/domain/word/value-objects/Meaning";
 import { Term } from "@/domain/word/value-objects/Term";
-import { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import { WordId } from "@/domain/word/value-objects/WordId";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import { BcryptPasswordHasher } from "@/infrastructure/auth/passwordHasher.bcrypt";
 import { DrizzleAuthRepository } from "@/infrastructure/auth/repository.drizzle";
 import { DrizzleWordRepository } from "@/infrastructure/word/repository.drizzle";
@@ -32,7 +32,7 @@ export const WordController = new Hono()
     zValidator(
       "json",
       z.object({
-        wordBookId: z.number(),
+        wordBookId: z.cuid2(),
         term: z.string().min(1).max(255),
         meaning: z.string().min(1),
       }),
@@ -56,7 +56,7 @@ export const WordController = new Hono()
       }
 
       const createdWord = await wordService.createWord({
-        wordBookId: WordBookId.create(wordBookId),
+        wordBookId: WordBookId.from(wordBookId),
         term: Term.create(term),
         meaning: Meaning.create(meaning),
       });
@@ -88,10 +88,7 @@ export const WordController = new Hono()
       return c.json({ ok: false, error: "unauthorized" }, 401);
     }
 
-    const wordBookId = Number(c.req.param("wordBookId"));
-    if (Number.isNaN(wordBookId)) {
-      return c.json({ ok: false, error: "invalid_word_book_id" }, 400);
-    }
+    const wordBookId = c.req.param("wordBookId");
 
     const wordBook = await wordBookService.findWordBookById(wordBookId);
     if (!wordBook || wordBook.userId !== me.user.id) {
@@ -99,7 +96,7 @@ export const WordController = new Hono()
     }
 
     const words = await wordService.findWordsByWordBookId(
-      WordBookId.create(wordBookId),
+      WordBookId.from(wordBookId),
     );
     return c.json(
       {
@@ -214,7 +211,7 @@ export const WordController = new Hono()
     zValidator(
       "json",
       z.object({
-        wordBookId: z.string().transform(Number),
+        wordBookId: z.cuid2(),
         csvContent: z.string(),
       }),
     ),
@@ -238,7 +235,7 @@ export const WordController = new Hono()
 
       try {
         const importedWords = await wordService.importWordsFromCsv(
-          WordBookId.create(wordBookId),
+          WordBookId.from(wordBookId),
           csvContent,
         );
         return c.json(

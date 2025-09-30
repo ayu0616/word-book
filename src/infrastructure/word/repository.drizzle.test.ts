@@ -15,8 +15,8 @@ import { CreatedAt } from "@/domain/word/value-objects/CreatedAt";
 import { Meaning } from "@/domain/word/value-objects/Meaning";
 import { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate";
 import { Term } from "@/domain/word/value-objects/Term";
-import { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import { WordId } from "@/domain/word/value-objects/WordId";
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import { DrizzleWordRepository } from "./repository.drizzle";
 
 // Mock the db object
@@ -59,7 +59,7 @@ vitest.mock("@/domain/word/entities", () => ({
   Word: {
     fromPersistence: vi.fn((data) => ({
       id: WordId.from(data.id),
-      wordBookId: WordBookId.create(data.wordBookId),
+      wordBookId: WordBookId.from(data.wordBookId),
       term: Term.create(data.term),
       meaning: Meaning.create(data.meaning),
       createdAt: CreatedAt.create(data.createdAt),
@@ -88,14 +88,15 @@ describe("DrizzleWordRepository", () => {
 
   describe("createWord", () => {
     it("should create and return a new Word", async () => {
+      const mockWordBookId = createId();
       const mockWord = Word.create({
-        wordBookId: WordBookId.create(1),
+        wordBookId: WordBookId.from(mockWordBookId),
         term: Term.create("test"),
         meaning: Meaning.create("テスト"),
       });
       const mockNewWordRow = {
         id: mockWord.id.value,
-        wordBookId: 1,
+        wordBookId: mockWordBookId,
         term: "test",
         meaning: "テスト",
         createdAt: new Date(),
@@ -128,9 +129,10 @@ describe("DrizzleWordRepository", () => {
   describe("findById", () => {
     it("should return a Word if found by ID", async () => {
       const mockId = createId();
+      const mockWordBookId = createId();
       const mockWordRow = {
         id: mockId,
-        wordBookId: 1,
+        wordBookId: mockWordBookId,
         term: "test",
         meaning: "テスト",
         createdAt: new Date(),
@@ -178,7 +180,7 @@ describe("DrizzleWordRepository", () => {
 
   describe("findWordsByWordBookId", () => {
     it("should return an array of Words for a given wordBookId", async () => {
-      const mockWordBookId = 1;
+      const mockWordBookId = createId();
       const mockWordRows = [
         {
           id: createId(),
@@ -206,7 +208,7 @@ describe("DrizzleWordRepository", () => {
       });
 
       const result = await repository.findWordsByWordBookId(
-        WordBookId.create(mockWordBookId),
+        WordBookId.from(mockWordBookId),
       );
 
       expect(db.select).toHaveBeenCalled();
@@ -225,9 +227,10 @@ describe("DrizzleWordRepository", () => {
 
   describe("update", () => {
     it("should update an existing word", async () => {
+      const mockWordBookId = createId();
       const mockWord = Word.fromPersistence({
         id: createId(),
-        wordBookId: 1,
+        wordBookId: mockWordBookId,
         term: "updated_test",
         meaning: "更新テスト",
         createdAt: new Date(),

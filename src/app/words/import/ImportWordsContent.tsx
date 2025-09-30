@@ -17,13 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { WordBookProps } from "@/domain/wordBook/word-book.entity";
 import { client } from "@/lib/hono";
-
-interface WordBook {
-  id: number;
-  userId: number;
-  title: string;
-}
 
 const formSchema = z.object({
   csvContent: z.string().min(1, "CSV内容を入力してください。"),
@@ -34,7 +29,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function ImportWordsContent({
   wordBook,
 }: {
-  wordBook: WordBook;
+  wordBook: WordBookProps;
 }) {
   const router = useRouter();
   const form = useForm<FormData>({

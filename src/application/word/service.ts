@@ -1,8 +1,8 @@
 import { Word } from "@/domain/word/entities";
 import { Meaning } from "@/domain/word/value-objects/Meaning";
 import { Term } from "@/domain/word/value-objects/Term";
-import type { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import type { WordId } from "@/domain/word/value-objects/WordId";
+import type { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import type { WordRepository } from "./ports";
 
 export class WordService {

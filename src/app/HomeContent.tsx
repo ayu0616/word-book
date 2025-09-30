@@ -3,25 +3,20 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { WordBookProps } from "@/domain/wordBook/word-book.entity";
 import { client } from "@/lib/hono";
-
-interface WordBook {
-  id: number;
-  userId: number;
-  title: string;
-}
 
 export default function HomeContent({
   wordBooks: initialWordBooks,
   error,
 }: {
-  wordBooks: WordBook[];
+  wordBooks: WordBookProps[];
   error: string | null;
 }) {
   const [wordBooks, setWordBooks] = useState(initialWordBooks);
   const [localError, _setLocalError] = useState<string | null>(error);
 
-  const handleDeleteClick = useCallback(async (wordBookId: number) => {
+  const handleDeleteClick = useCallback(async (wordBookId: string) => {
     if (!confirm("Are you sure you want to delete this word book?")) {
       return;
     }

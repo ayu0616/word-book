@@ -41,7 +41,7 @@ export const WordBookController = new Hono()
         userId: me.user.id,
         title,
       });
-      return c.json({ ok: true, wordBook }, 201);
+      return c.json({ ok: true, wordBook: wordBook.toJson() }, 201);
     },
   )
   .get("/list", async (c) => {
@@ -56,7 +56,10 @@ export const WordBookController = new Hono()
     }
 
     const wordBooks = await service.findWordBooksByUserId(me.user.id);
-    return c.json({ ok: true, wordBooks }, 200);
+    return c.json(
+      { ok: true, wordBooks: wordBooks.map((wb) => wb.toJson()) },
+      200,
+    );
   })
   .get("/get/:id", async (c) => {
     const sid = getCookie(c, SESSION_COOKIE);
@@ -69,24 +72,21 @@ export const WordBookController = new Hono()
       return c.json({ ok: false, error: "unauthorized" }, 401);
     }
 
-    const id = Number.parseInt(c.req.param("id"), 10);
-    if (Number.isNaN(id)) {
-      return c.json({ ok: false, error: "invalid_id" }, 400);
-    }
+    const id = c.req.param("id");
 
     const wordBook = await service.findWordBookById(id);
     if (!wordBook || wordBook.userId !== me.user.id) {
       return c.json({ ok: false, error: "word_book_not_found" }, 404);
     }
 
-    return c.json({ ok: true, wordBook }, 200);
+    return c.json({ ok: true, wordBook: wordBook.toJson() }, 200);
   })
   .delete(
     "/:id",
     zValidator(
       "param",
       z.object({
-        id: z.string().transform(Number),
+        id: z.cuid2(),
       }),
     ),
     async (c) => {
@@ -123,7 +123,7 @@ export const WordBookController = new Hono()
     zValidator(
       "param",
       z.object({
-        id: z.string().transform(Number),
+        id: z.cuid2(),
       }),
     ),
     zValidator(

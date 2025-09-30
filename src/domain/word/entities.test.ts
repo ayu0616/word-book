@@ -1,16 +1,17 @@
 import { createId } from "@paralleldrive/cuid2";
 import { describe, expect, it } from "vitest";
+import { WordBookId } from "../wordBook/value-objects/word-book-id";
 import { Word } from "./entities";
 import { CreatedAt } from "./value-objects/CreatedAt";
 import { Meaning } from "./value-objects/Meaning";
 import { NextReviewDate } from "./value-objects/NextReviewDate";
 import { Term } from "./value-objects/Term";
-import { WordBookId } from "./value-objects/WordBookId";
 import { WordId } from "./value-objects/WordId";
 
 describe("Word", () => {
   it("新しいWordインスタンスを生成できる", () => {
-    const wordBookId = WordBookId.create(1);
+    const wordBookIdStr = createId();
+    const wordBookId = WordBookId.from(wordBookIdStr);
     const term = Term.create("test");
     const meaning = Meaning.create("テスト");
 
@@ -29,9 +30,10 @@ describe("Word", () => {
   it("永続化データからWordインスタンスを生成できる", () => {
     const now = new Date();
     const wordId = createId();
+    const wordBookIdStr = createId();
     const word = Word.fromPersistence({
       id: wordId,
-      wordBookId: 1,
+      wordBookId: wordBookIdStr,
       term: "persisted",
       meaning: "永続化された",
       createdAt: now,
@@ -43,7 +45,7 @@ describe("Word", () => {
     expect(word.id).toBeInstanceOf(WordId);
     expect(word.id?.value).toBe(wordId);
     expect(word.wordBookId).toBeInstanceOf(WordBookId);
-    expect(word.wordBookId.value).toBe(1);
+    expect(word.wordBookId.value).toBe(wordBookIdStr);
     expect(word.term).toBeInstanceOf(Term);
     expect(word.term.value).toBe("persisted");
     expect(word.meaning).toBeInstanceOf(Meaning);
@@ -56,7 +58,8 @@ describe("Word", () => {
   });
 
   it("正解時に連続正解数と次回復習日が正しく更新される", () => {
-    const _wordBookId = WordBookId.create(1);
+    const wordBookIdStr = createId();
+    const _wordBookId = WordBookId.from(wordBookIdStr);
     const _term = Term.create("test");
     const _meaning = Meaning.create("テスト");
     const initialDate = new Date("2025-01-01T00:00:00.000Z");
@@ -64,7 +67,7 @@ describe("Word", () => {
     // fromPersistenceの引数はプリミティブ型で渡す
     const word = Word.fromPersistence({
       id: createId(),
-      wordBookId: 1,
+      wordBookId: wordBookIdStr,
       term: "test",
       meaning: "テスト",
       createdAt: initialDate,
@@ -92,7 +95,8 @@ describe("Word", () => {
   });
 
   it("不正解時に連続正解数がリセットされ次回復習日が当日になる", () => {
-    const _wordBookId = WordBookId.create(1);
+    const wordBookIdStr = createId();
+    const _wordBookId = WordBookId.from(wordBookIdStr);
     const _term = Term.create("test");
     const _meaning = Meaning.create("テスト");
     const initialDate = new Date("2025-01-01T00:00:00.000Z");
@@ -100,7 +104,7 @@ describe("Word", () => {
     // fromPersistenceの引数はプリミティブ型で渡す
     const word = Word.fromPersistence({
       id: createId(),
-      wordBookId: 1,
+      wordBookId: wordBookIdStr,
       term: "test",
       meaning: "テスト",
       createdAt: initialDate,

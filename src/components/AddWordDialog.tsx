@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 interface AddWordDialogProps {
-  wordBookId: number;
+  wordBookId: string;
 }
 
 export const AddWordDialogTrigger: FC<

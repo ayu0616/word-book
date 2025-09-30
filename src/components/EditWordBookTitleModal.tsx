@@ -26,7 +26,7 @@ import { client } from "@/lib/hono";
 interface EditWordBookTitleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  wordBookId: number;
+  wordBookId: string;
   currentTitle: string;
   onSave: (newTitle: string) => void;
 }

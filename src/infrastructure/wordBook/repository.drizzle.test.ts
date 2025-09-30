@@ -12,6 +12,12 @@ import { wordBooks } from "@/db/schema";
 import { WordBook } from "@/domain/wordBook/word-book.entity";
 import { DrizzleWordBookRepository } from "./repository.drizzle";
 
+// cuid2のサンプルID
+const cuid1 = "clv1abcd00001xyz123456789";
+const cuid2 = "clv1abcd00002xyz123456789";
+const cuid3 = "clv1abcd00003xyz123456789";
+const cuid4 = "clv1abcd00004xyz123456789";
+
 // Mock the db object
 vitest.mock("@/db", () => ({
   db: {
@@ -67,12 +73,14 @@ describe("DrizzleWordBookRepository", () => {
   describe("create", () => {
     it("should create and return a new WordBook", async () => {
       const mockWordBook = {
+        id: cuid1,
         userId: 1,
         title: "Test WordBook",
       };
       const mockNewWordBookRow = {
-        id: 1,
-        ...mockWordBook,
+        id: cuid1,
+        userId: mockWordBook.userId,
+        title: mockWordBook.title,
       };
 
       (db.insert as Mock).mockReturnValue({
@@ -84,6 +92,7 @@ describe("DrizzleWordBookRepository", () => {
 
       expect(db.insert).toHaveBeenCalledWith(wordBooks);
       expect((db.insert as Mock)().values).toHaveBeenCalledWith({
+        id: mockWordBook.id,
         userId: mockWordBook.userId,
         title: mockWordBook.title,
       });
@@ -96,8 +105,8 @@ describe("DrizzleWordBookRepository", () => {
     it("should return an array of WordBooks for a given userId", async () => {
       const mockUserId = 1;
       const mockWordBookRows = [
-        { id: 1, userId: mockUserId, title: "WordBook 1" },
-        { id: 2, userId: mockUserId, title: "WordBook 2" },
+        { id: cuid1, userId: mockUserId, title: "WordBook 1" },
+        { id: cuid2, userId: mockUserId, title: "WordBook 2" },
       ];
 
       (db.select as Mock).mockReturnValue({
@@ -124,7 +133,7 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("findWordBookById", () => {
     it("should return a WordBook if found by ID", async () => {
-      const mockId = 1;
+      const mockId = cuid3;
       const mockWordBookRow = { id: mockId, userId: 1, title: "Test WordBook" };
 
       (db.select as Mock).mockReturnValue({
@@ -147,7 +156,7 @@ describe("DrizzleWordBookRepository", () => {
     });
 
     it("should return null if not found by ID", async () => {
-      const mockId = 999;
+      const mockId = "clv1notfound00000000000000";
 
       (db.select as Mock).mockReturnValue({
         from: vi.fn().mockReturnThis(),
@@ -163,7 +172,7 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("delete", () => {
     it("should delete a word book by ID", async () => {
-      const mockId = 1;
+      const mockId = cuid4;
       const mockWhere = vi.fn();
       (db.delete as Mock).mockReturnValue({
         where: mockWhere,
@@ -183,7 +192,7 @@ describe("DrizzleWordBookRepository", () => {
 
   describe("updateTitle", () => {
     it("should update the title of a word book", async () => {
-      const mockId = 1;
+      const mockId = cuid2;
       const mockTitle = "New Title";
       const mockWhere = vi.fn();
       (db.update as Mock).mockReturnValue({

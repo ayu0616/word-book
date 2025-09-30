@@ -14,6 +14,7 @@ import { words } from "@/db/schema";
 import type { WordProps } from "@/domain/word/entities";
 import { NextReviewDate } from "@/domain/word/value-objects/NextReviewDate"; // 追加
 import { WordId } from "@/domain/word/value-objects/WordId"; // 追加
+import { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 import { DrizzleLearningRecordRepository } from "./repository.drizzle";
 
 vitest.mock("@/db", () => ({
@@ -51,7 +52,7 @@ describe("DrizzleLearningRecordRepository", () => {
 
   describe("findWordsToLearn", () => {
     it("should return words to learn based on wordBookId and review date", async () => {
-      const mockWordBookId = 1;
+      const mockWordBookId = createId();
       // モックデータを作成
       const mockWords: WordProps[] = [
         {
@@ -79,7 +80,9 @@ describe("DrizzleLearningRecordRepository", () => {
         where: vi.fn().mockResolvedValue(mockWords),
       });
 
-      const result = await repository.findWordsToLearn(mockWordBookId);
+      const result = await repository.findWordsToLearn(
+        WordBookId.from(mockWordBookId),
+      );
 
       expect(result.map((w) => w.toJson())).toEqual(mockWords);
       expect(db.select).toHaveBeenCalled();
@@ -134,7 +137,7 @@ describe("DrizzleLearningRecordRepository", () => {
 
   describe("countWordsToLearn", () => {
     it("should return the count of words to learn based on wordBookId and review date", async () => {
-      const mockWordBookId = 1;
+      const mockWordBookId = createId();
       const mockCount = 5;
 
       (db.select as Mock).mockReturnValue({
@@ -142,7 +145,9 @@ describe("DrizzleLearningRecordRepository", () => {
         where: vi.fn().mockResolvedValue([{ count: mockCount }]),
       });
 
-      const result = await repository.countWordsToLearn(mockWordBookId);
+      const result = await repository.countWordsToLearn(
+        WordBookId.from(mockWordBookId),
+      );
 
       expect(result).toBe(mockCount);
       expect(db.select).toHaveBeenCalled();

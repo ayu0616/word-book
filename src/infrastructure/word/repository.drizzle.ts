@@ -3,8 +3,8 @@ import type { WordRepository } from "@/application/word/ports";
 import { db } from "@/db";
 import { words } from "@/db/schema";
 import { Word } from "@/domain/word/entities";
-import type { WordBookId } from "@/domain/word/value-objects/WordBookId";
 import type { WordId } from "@/domain/word/value-objects/WordId";
+import type { WordBookId } from "@/domain/wordBook/value-objects/word-book-id";
 
 export class DrizzleWordRepository implements WordRepository {
   async createWord(word: Word): Promise<Word> {
