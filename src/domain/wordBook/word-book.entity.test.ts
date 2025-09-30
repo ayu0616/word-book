@@ -32,4 +32,22 @@ describe("WordBook", () => {
     expect(wordBook.userId).toBe(2);
     expect(wordBook.title.value).toBe("Persisted WordBook");
   });
+  it("should return a JSON representation of the WordBook", () => {
+    const wordBookId = createId();
+    const userId = 3;
+    const title = "JSON Test WordBook";
+    const wordBook = WordBook.fromPersistence({
+      id: wordBookId,
+      userId,
+      title,
+    });
+
+    const json = wordBook.toJson();
+
+    expect(json).toEqual({
+      id: wordBookId,
+      userId,
+      title,
+    });
+  });
 });
