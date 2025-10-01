@@ -58,7 +58,7 @@ export function EditWordModal({
       const res = await client.word[":id"].$put({
         json: values,
         param: {
-          id: word.id?.toString() ?? "",
+          id: word.id,
         },
       });
       if (!res.ok) {

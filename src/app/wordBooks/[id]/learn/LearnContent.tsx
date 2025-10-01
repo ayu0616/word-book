@@ -1,7 +1,9 @@
 "use client";
 
+import { EditIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { ChatGPTLink } from "@/components/ChatGPTLink";
+import { EditWordModal } from "@/components/EditWordModal";
 import { GoogleSearchLink } from "@/components/GoogleSearchLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,9 +23,14 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     incorrectCount: 0,
   });
 
+  // 単語編集モーダルの状態管理
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // 編集後の単語リスト
+  const [words, setWords] = useState<WordProps[]>(initialWords);
+
   const currentWordData =
-    initialWords.length > 0 && currentWordIndex < initialWords.length
-      ? initialWords[currentWordIndex]
+    words.length > 0 && currentWordIndex < words.length
+      ? words[currentWordIndex]
       : null;
 
   const moveToNextWord = useCallback(() => {
@@ -58,7 +65,33 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     }
   };
 
-  if (initialWords.length === 0) {
+  // 編集ボタン押下時
+  const handleEditClick = () => {
+    setIsEditModalOpen(true);
+  };
+
+  // 編集モーダルの保存時
+  const handleEditSave = (updatedWord: {
+    id: string;
+    term: string;
+    meaning: string;
+  }) => {
+    setWords((prevWords) =>
+      prevWords.map((word) =>
+        word.id === updatedWord.id
+          ? { ...word, term: updatedWord.term, meaning: updatedWord.meaning }
+          : word,
+      ),
+    );
+    setIsEditModalOpen(false);
+  };
+
+  // 編集モーダルのクローズ時
+  const handleEditClose = () => {
+    setIsEditModalOpen(false);
+  };
+
+  if (words.length === 0) {
     return (
       <div className="container mx-auto flex justify-center items-center flex-1 p-4">
         <p>本日の学習は完了しました。</p>
@@ -90,73 +123,88 @@ export function LearnContent({ initialWords }: LearnContentProps) {
   }
 
   return (
-    <div className="container mx-auto flex flex-1 p-4 flex-col gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>学習状況</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="text-sm text-muted-foreground">
-            <tbody>
-              <tr>
-                <td className="pr-4">正解数</td>
-                <td>{learningStats.correctCount}</td>
-              </tr>
-              <tr>
-                <td className="pr-4">不正解数</td>
-                <td>{learningStats.incorrectCount}</td>
-              </tr>
-              <tr>
-                <td className="pr-4">学習済み単語数</td>
-                <td>
-                  {learningStats.correctCount + learningStats.incorrectCount} /{" "}
-                  {initialWords.length}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-      <div className="flex flex-1 justify-center items-center">
-        <Card className="w-full">
+    <>
+      <div className="container mx-auto flex flex-1 p-4 flex-col gap-4">
+        <Card>
           <CardHeader>
-            <CardTitle>{currentWordData.term}</CardTitle>
+            <CardTitle>学習状況</CardTitle>
           </CardHeader>
           <CardContent>
-            {showMeaning && (
-              <p className="mb-4 whitespace-pre-wrap">
-                {currentWordData.meaning}
-              </p>
-            )}
-            {!showMeaning && (
-              <div>
-                <Button className="w-full" onClick={handleShowAnswer}>
-                  答えを見る
-                </Button>
-              </div>
-            )}
-            {showMeaning && (
-              <div className="space-y-4">
-                <div className="flex justify-center gap-4">
-                  <Button
-                    onClick={() => handleRecordResult("incorrect")}
-                    variant="destructive"
-                  >
-                    不正解だった
-                  </Button>
-                  <Button onClick={() => handleRecordResult("correct")}>
-                    正解した
-                  </Button>
-                </div>
-                <div className="flex justify-center gap-4">
-                  <GoogleSearchLink term={currentWordData.term} />
-                  <ChatGPTLink term={currentWordData.term} />
-                </div>
-              </div>
-            )}
+            <table className="text-sm text-muted-foreground">
+              <tbody>
+                <tr>
+                  <td className="pr-4">正解数</td>
+                  <td>{learningStats.correctCount}</td>
+                </tr>
+                <tr>
+                  <td className="pr-4">不正解数</td>
+                  <td>{learningStats.incorrectCount}</td>
+                </tr>
+                <tr>
+                  <td className="pr-4">学習済み単語数</td>
+                  <td>
+                    {learningStats.correctCount + learningStats.incorrectCount}{" "}
+                    / {words.length}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </CardContent>
         </Card>
+        <div className="flex flex-1 justify-center items-center">
+          <Card className="w-full">
+            <CardHeader className="flex-row items-center">
+              <CardTitle className="flex-1 mb-0">
+                {currentWordData.term}
+              </CardTitle>
+              {showMeaning && (
+                <Button size="icon" variant="ghost" onClick={handleEditClick}>
+                  <EditIcon />
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              {showMeaning && (
+                <p className="mb-4 whitespace-pre-wrap">
+                  {currentWordData.meaning}
+                </p>
+              )}
+              {!showMeaning && (
+                <div>
+                  <Button className="w-full" onClick={handleShowAnswer}>
+                    答えを見る
+                  </Button>
+                </div>
+              )}
+              {showMeaning && (
+                <div className="space-y-4">
+                  <div className="flex justify-center gap-4">
+                    <Button
+                      onClick={() => handleRecordResult("incorrect")}
+                      variant="destructive"
+                    >
+                      不正解だった
+                    </Button>
+                    <Button onClick={() => handleRecordResult("correct")}>
+                      正解した
+                    </Button>
+                  </div>
+                  <div className="flex justify-center gap-4">
+                    <GoogleSearchLink term={currentWordData.term} />
+                    <ChatGPTLink term={currentWordData.term} />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
+      <EditWordModal
+        isOpen={isEditModalOpen}
+        onClose={handleEditClose}
+        word={currentWordData}
+        onSave={handleEditSave}
+      />
+    </>
   );
 }
