@@ -36,8 +36,7 @@ export default function WordBookContent({
 }) {
   const [wordBook, setWordBook] = useState(initialWordBook);
   const [words, setWords] = useState<WordProps[]>(initialWords);
-  const [isWordModalOpen, setIsWordModalOpen] = useState(false);
-  const [editingWord, setEditingWord] = useState<WordProps | null>(null);
+  const [_editingWord, setEditingWord] = useState<WordProps | null>(null);
   const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -46,11 +45,6 @@ export default function WordBookContent({
       word.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
       word.meaning.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-  const handleEditClick = (word: WordProps) => {
-    setEditingWord(word);
-    setIsWordModalOpen(true);
-  };
 
   const handleSaveWord = (updatedWord: {
     id: string;
@@ -62,12 +56,6 @@ export default function WordBookContent({
         word.id === updatedWord.id ? { ...word, ...updatedWord } : word,
       ),
     );
-    setIsWordModalOpen(false);
-    setEditingWord(null);
-  };
-
-  const handleCloseWordModal = () => {
-    setIsWordModalOpen(false);
     setEditingWord(null);
   };
 
@@ -187,13 +175,7 @@ export default function WordBookContent({
                 </p>
               </div>
               <div className="flex gap-2 items-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditClick(word)}
-                >
-                  Edit
-                </Button>
+                <EditWordModal word={word} onSave={handleSaveWord} />
                 <Button
                   variant="destructive"
                   size="sm"
@@ -205,15 +187,6 @@ export default function WordBookContent({
             </li>
           ))}
         </ul>
-      )}
-
-      {editingWord && (
-        <EditWordModal
-          isOpen={isWordModalOpen}
-          onClose={handleCloseWordModal}
-          word={editingWord}
-          onSave={handleSaveWord}
-        />
       )}
 
       <EditWordBookTitleModal
