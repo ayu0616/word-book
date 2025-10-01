@@ -3,7 +3,8 @@ FROM oven/bun:1 AS deps
 WORKDIR /app
 
 COPY package.json bun.lock* ./
-RUN bun install --frozen-lockfile
+RUN --mount=type=cache,id=bun-cache-deps,target=/root/.bun \
+    bun install --frozen-lockfile
 
 FROM oven/bun:1 AS builder
 
@@ -11,8 +12,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js をビルド
-RUN bun run build
+# .next/cache ディレクトリのキャッシュを利用
+RUN --mount=type=cache,target=.next/cache \
+    --mount=type=cache,id=bun-cache-build,target=/root/.bun \
+    bun run build
 
 FROM oven/bun:1 AS runner
 WORKDIR /app
