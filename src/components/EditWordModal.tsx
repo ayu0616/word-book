@@ -114,6 +114,9 @@ export function EditWordModal({
               )}
             />
             <DialogFooter>
+              <Button variant="outline" onClick={onClose}>
+                キャンセル
+              </Button>
               <Button type="submit" disabled={isSubmitting}>
                 変更を保存
               </Button>
