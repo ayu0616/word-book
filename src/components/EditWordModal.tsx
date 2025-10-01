@@ -1,6 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EditIcon } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -10,6 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -25,8 +28,6 @@ import type { WordProps } from "@/domain/word/entities";
 import { client } from "@/lib/hono";
 
 interface EditWordModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   word: WordProps;
   onSave: (updatedWord: { id: string; term: string; meaning: string }) => void;
 }
@@ -38,12 +39,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function EditWordModal({
-  isOpen,
-  onClose,
-  word,
-  onSave,
-}: EditWordModalProps) {
+export function EditWordModal({ word, onSave }: EditWordModalProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,7 +55,7 @@ export function EditWordModal({
       const res = await client.word[":id"].$put({
         json: values,
         param: {
-          id: word.id?.toString() ?? "",
+          id: word.id,
         },
       });
       if (!res.ok) {
@@ -72,7 +69,7 @@ export function EditWordModal({
         term: updatedWord.word.term,
         meaning: updatedWord.word.meaning,
       });
-      onClose();
+      setIsModalOpen(false);
     } catch (error: unknown) {
       console.error("単語の更新エラー:", error);
       // Optionally, display an error message to the user
@@ -80,7 +77,12 @@ export function EditWordModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="ghost">
+          <EditIcon />
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>単語を編集</DialogTitle>
@@ -114,6 +116,9 @@ export function EditWordModal({
               )}
             />
             <DialogFooter>
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                キャンセル
+              </Button>
               <Button type="submit" disabled={isSubmitting}>
                 変更を保存
               </Button>

@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { ChatGPTLink } from "@/components/ChatGPTLink";
+import { EditWordModal } from "@/components/EditWordModal";
 import { GoogleSearchLink } from "@/components/GoogleSearchLink";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,23 +13,30 @@ type LearnContentProps = {
   initialWords: WordProps[];
 };
 
+interface LearningStats {
+  correctCount: number;
+  incorrectCount: number;
+}
+
 export function LearnContent({ initialWords }: LearnContentProps) {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [learningStats, setLearningStats] = useState({
+  const [learningStats, setLearningStats] = useState<LearningStats>({
     correctCount: 0,
     incorrectCount: 0,
   });
 
+  // 編集後の単語リスト
+  const [words, setWords] = useState<WordProps[]>(initialWords);
+
   const currentWordData =
-    initialWords.length > 0 && currentWordIndex < initialWords.length
-      ? initialWords[currentWordIndex]
+    words.length > 0 && currentWordIndex < words.length
+      ? words[currentWordIndex]
       : null;
 
   const moveToNextWord = useCallback(() => {
-    setShowMeaning(false);
     setCurrentWordIndex((prevIndex) => prevIndex + 1);
+    setShowMeaning(false);
   }, []);
 
   const handleShowAnswer = () => {
@@ -37,28 +45,42 @@ export function LearnContent({ initialWords }: LearnContentProps) {
 
   const handleRecordResult = async (result: "correct" | "incorrect") => {
     if (!currentWordData) return;
-    setLearningStats((prev) => {
-      if (result === "correct") {
-        return { ...prev, correctCount: prev.correctCount + 1 };
-      }
-      return { ...prev, incorrectCount: prev.incorrectCount + 1 };
-    });
 
     try {
-      const res = await client.learning.record.$post({
-        json: { wordId: currentWordData.id, result },
+      await client.learning.record.$post({
+        json: {
+          wordId: currentWordData.id,
+          result,
+        },
       });
-      if (!res.ok) {
-        throw new Error("Failed to record learning result.");
-      }
-      // After recording, move to the next word in the local list
+
+      setLearningStats((prevStats) =>
+        result === "correct"
+          ? { ...prevStats, correctCount: prevStats.correctCount + 1 }
+          : { ...prevStats, incorrectCount: prevStats.incorrectCount + 1 },
+      );
       moveToNextWord();
-    } catch (err) {
-      setError((err as Error).message);
+    } catch (error) {
+      console.error("学習結果の記録エラー:", error);
     }
   };
 
-  if (initialWords.length === 0) {
+  // 編集モーダルの保存時
+  const handleEditSave = (updatedWord: {
+    id: string;
+    term: string;
+    meaning: string;
+  }) => {
+    setWords((prevWords) =>
+      prevWords.map((word) =>
+        word.id === updatedWord.id
+          ? { ...word, term: updatedWord.term, meaning: updatedWord.meaning }
+          : word,
+      ),
+    );
+  };
+
+  if (words.length === 0) {
     return (
       <div className="container mx-auto flex justify-center items-center flex-1 p-4">
         <p>本日の学習は完了しました。</p>
@@ -66,27 +88,12 @@ export function LearnContent({ initialWords }: LearnContentProps) {
     );
   }
 
-  if (error) {
-    return <p className="text-red-500">Error: {error}</p>;
-  }
-
   if (!currentWordData) {
-    if (learningStats.incorrectCount > 0) {
-      return (
-        <div className="container mx-auto flex flex-col gap-4 justify-center items-center flex-1 p-4">
-          <p>リロードして間違えた単語を復習してください。</p>
-          <div>
-            <Button onClick={() => window.location.reload()}>リロード</Button>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="container mx-auto flex justify-center items-center flex-1 p-4">
-          <p>本日の学習は完了しました。</p>
-        </div>
-      );
-    }
+    return (
+      <div className="container mx-auto flex justify-center items-center flex-1 p-4">
+        <p>単語帳に単語がありません。</p>
+      </div>
+    );
   }
 
   return (
@@ -110,7 +117,7 @@ export function LearnContent({ initialWords }: LearnContentProps) {
                 <td className="pr-4">学習済み単語数</td>
                 <td>
                   {learningStats.correctCount + learningStats.incorrectCount} /{" "}
-                  {initialWords.length}
+                  {words.length}
                 </td>
               </tr>
             </tbody>
@@ -119,8 +126,13 @@ export function LearnContent({ initialWords }: LearnContentProps) {
       </Card>
       <div className="flex flex-1 justify-center items-center">
         <Card className="w-full">
-          <CardHeader>
-            <CardTitle>{currentWordData.term}</CardTitle>
+          <CardHeader className="flex-row items-center">
+            <CardTitle className="flex-1 mb-0">
+              {currentWordData.term}
+            </CardTitle>
+            {showMeaning && (
+              <EditWordModal word={currentWordData} onSave={handleEditSave} />
+            )}
           </CardHeader>
           <CardContent>
             {showMeaning && (
