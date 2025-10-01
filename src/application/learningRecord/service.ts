@@ -30,9 +30,15 @@ export class LearningRecordService {
   }
 
   async getWordsToLearn(wordBookId: string): Promise<Word[]> {
-    return this.learningRecordRepository.findWordsToLearn(
+    const words = await this.learningRecordRepository.findWordsToLearn(
       WordBookId.from(wordBookId),
     );
+    // Fisher-Yatesシャッフルで順序をランダム化
+    for (let i = words.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [words[i], words[j]] = [words[j], words[i]];
+    }
+    return words;
   }
 
   async countWordsToLearn(wordBookId: string): Promise<number> {
