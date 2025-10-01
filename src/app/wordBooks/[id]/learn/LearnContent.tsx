@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useState } from "react";
 import { ChatGPTLink } from "@/components/ChatGPTLink";
 import { EditWordModal } from "@/components/EditWordModal";
