@@ -4,7 +4,7 @@ import type { AppType } from "@/app/api/[[...route]]/route";
 
 const url =
   process.env.NODE_ENV === "production"
-    ? `http://app:${process.env.PORT || "3000"}/`
+    ? `http://app-prod:${process.env.PORT || "3000"}/`
     : `http://localhost:${process.env.PORT || "3000"}/`;
 
 export const getServerClient = async () => {
